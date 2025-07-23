@@ -1,0 +1,95 @@
+{
+  "version": 3,
+  "targets": {
+    "net9.0": {
+      "InvoicingApp.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "compile": {
+          "bin/placeholder/InvoicingApp.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/InvoicingApp.Core.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "InvoicingApp.Core/1.0.0": {
+      "type": "project",
+      "path": "../InvoicingApp.Core/InvoicingApp.Core.csproj",
+      "msbuildProject": "../InvoicingApp.Core/InvoicingApp.Core.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net9.0": [
+      "InvoicingApp.Core >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\nulys\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\nulys\\Documents\\Prog\\Invoicing Application\\Backend\\src\\InvoicingApp.Application\\InvoicingApp.Application.csproj",
+      "projectName": "InvoicingApp.Application",
+      "projectPath": "C:\\Users\\nulys\\Documents\\Prog\\Invoicing Application\\Backend\\src\\InvoicingApp.Application\\InvoicingApp.Application.csproj",
+      "packagesPath": "C:\\Users\\nulys\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\nulys\\Documents\\Prog\\Invoicing Application\\Backend\\src\\InvoicingApp.Application\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\nulys\\AppData\\Roaming\\NuGet\\NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net9.0"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "projectReferences": {
+            "C:\\Users\\nulys\\Documents\\Prog\\Invoicing Application\\Backend\\src\\InvoicingApp.Core\\InvoicingApp.Core.csproj": {
+              "projectPath": "C:\\Users\\nulys\\Documents\\Prog\\Invoicing Application\\Backend\\src\\InvoicingApp.Core\\InvoicingApp.Core.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "net9.0": {
+        "targetAlias": "net9.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.303/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
