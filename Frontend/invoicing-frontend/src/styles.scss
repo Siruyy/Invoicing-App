@@ -1,0 +1,57 @@
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* PrimeNG CSS */
+@import "primeng/resources/primeng.css";
+@import "primeicons/primeicons.css";
+@import "primeflex/primeflex.css";
+
+/* PrimeNG Theme - Use CSS variables approach for light/dark mode */
+:root {
+  /* Light mode variables */
+  --surface-a: #ffffff;
+  --surface-b: #f8f9fa;
+  --surface-c: #e9ecef;
+  --surface-d: #dee2e6;
+  --surface-e: #ffffff;
+  --text-color: #495057;
+  --text-color-secondary: #6c757d;
+  --primary-color: #007FFF;
+  --primary-color-text: #ffffff;
+  --highlight-bg: #EEF2FF;
+  --highlight-text-color: #007FFF;
+}
+
+/* Dark mode variables */
+.dark {
+  --surface-a: #121212;
+  --surface-b: #1e1e1e;
+  --surface-c: #2b2b2b;
+  --surface-d: #383838;
+  --surface-e: #1e1e1e;
+  --text-color: #e9ecef;
+  --text-color-secondary: #adb5bd;
+  --primary-color: #007FFF;
+  --primary-color-text: #ffffff;
+  --highlight-bg: #1A2A45;
+  --highlight-text-color: #66adff;
+}
+
+/* Global custom styles */
+body {
+  font-family: var(--font-family);
+  color: var(--text-color);
+  background-color: var(--surface-b);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth transitions when switching between light and dark mode */
+body * {
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
