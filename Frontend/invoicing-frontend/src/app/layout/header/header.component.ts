@@ -8,12 +8,12 @@ import { ThemeService } from '../../core/services/theme.service';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
-    <header class="bg-white dark:bg-gray-900 shadow border-b border-gray-200 dark:border-gray-800 transition-colors">
+    <header class="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex justify-between items-center">
           <!-- Logo and Title - Left aligned -->
           <div class="flex items-center">
-            <a routerLink="/" class="text-primary-600 dark:text-primary-400 font-bold text-xl flex items-center">
+            <a routerLink="/" class="text-blue-600 dark:text-primary-400 font-bold text-xl flex items-center">
               <i class="pi pi-file-invoice text-2xl mr-2"></i>
               Invoicing App
             </a>
@@ -25,9 +25,9 @@ import { ThemeService } from '../../core/services/theme.service';
               <li>
                 <a 
                   routerLink="/dashboard" 
-                  routerLinkActive="text-primary-600 dark:text-primary-400 font-medium border-b-2 border-primary-500 pb-1" 
+                  routerLinkActive="text-blue-600 dark:text-primary-400 font-medium border-b-2 border-blue-500 dark:border-primary-500 pb-1" 
                   [routerLinkActiveOptions]="{exact: true}"
-                  class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-primary-400 transition-all"
                 >
                   Dashboard
                 </a>
@@ -35,8 +35,8 @@ import { ThemeService } from '../../core/services/theme.service';
               <li>
                 <a 
                   routerLink="/clients" 
-                  routerLinkActive="text-primary-600 dark:text-primary-400 font-medium border-b-2 border-primary-500 pb-1"
-                  class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  routerLinkActive="text-blue-600 dark:text-primary-400 font-medium border-b-2 border-blue-500 dark:border-primary-500 pb-1"
+                  class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-primary-400 transition-all"
                 >
                   Clients
                 </a>
@@ -44,8 +44,8 @@ import { ThemeService } from '../../core/services/theme.service';
               <li>
                 <a 
                   routerLink="/invoices" 
-                  routerLinkActive="text-primary-600 dark:text-primary-400 font-medium border-b-2 border-primary-500 pb-1"
-                  class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  routerLinkActive="text-blue-600 dark:text-primary-400 font-medium border-b-2 border-blue-500 dark:border-primary-500 pb-1"
+                  class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-primary-400 transition-all"
                 >
                   Invoices
                 </a>
@@ -56,14 +56,19 @@ import { ThemeService } from '../../core/services/theme.service';
           <!-- Right side icons -->
           <div class="flex items-center space-x-4">
             <button 
-              class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 p-2 rounded-full transition-colors"
+              class="theme-toggle-btn text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-primary-400 p-2 rounded-full transition-all"
               aria-label="Toggle dark mode"
               (click)="toggleDarkMode()"
             >
-              <i class="pi" [ngClass]="isDarkMode ? 'pi-sun' : 'pi-moon'" class="text-lg"></i>
+              <div class="relative">
+                <i class="pi pi-sun text-lg absolute transition-opacity" 
+                   [ngClass]="{'opacity-0': !isDarkMode, 'opacity-100': isDarkMode}"></i>
+                <i class="pi pi-moon text-lg transition-opacity" 
+                   [ngClass]="{'opacity-0': isDarkMode, 'opacity-100': !isDarkMode}"></i>
+              </div>
             </button>
             <button 
-              class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 p-2 rounded-full transition-colors"
+              class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-primary-400 p-2 rounded-full transition-all"
               aria-label="User profile"
             >
               <i class="pi pi-user text-lg"></i>
@@ -88,6 +93,28 @@ import { ThemeService } from '../../core/services/theme.service';
     
     .border-b-2 {
       border-bottom-width: 2px;
+    }
+    
+    .theme-toggle-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .theme-toggle-btn i {
+      transition: opacity 0.3s ease;
+    }
+    
+    /* Ensure active items have correct text color in light mode */
+    a.text-blue-600 {
+      color: #2563eb !important;
+    }
+    
+    /* Ensure hover states are consistent */
+    a:hover.hover\:text-blue-600 {
+      color: #2563eb !important;
     }
   `
 })

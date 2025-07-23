@@ -8,16 +8,16 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          50: '#e6f2ff',
-          100: '#cce4ff',
-          200: '#99c9ff',
-          300: '#66adff',
-          400: '#3392ff',
-          500: '#007FFF', // Azure blue as primary color
-          600: '#0066cc',
-          700: '#004c99',
-          800: '#003366',
-          900: '#001933',
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6', // Blue as primary color
+          600: '#2563eb',
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
         },
         accent: {
           50: '#eef2ff',

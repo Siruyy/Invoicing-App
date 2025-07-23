@@ -8,39 +8,94 @@ import { CardComponent } from '../card/card.component';
   imports: [CommonModule, CardComponent],
   template: `
     <app-card>
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">{{ title }}</h3>
-          <div class="mt-1 flex items-baseline">
-            <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-              {{ prefix }}{{ value | number:format }}{{ suffix }}
-            </p>
-            
-            <p *ngIf="change !== undefined" 
-              class="ml-2 flex items-baseline text-sm font-semibold"
-              [ngClass]="{
-                'text-green-600 dark:text-green-400': change > 0,
-                'text-red-600 dark:text-red-400': change < 0,
-                'text-gray-500 dark:text-gray-400': change === 0
-              }"
-            >
-              <span class="flex items-center">
-                <i *ngIf="change > 0" class="pi pi-arrow-up mr-1"></i>
-                <i *ngIf="change < 0" class="pi pi-arrow-down mr-1"></i>
-                {{ change > 0 ? '+' : '' }}{{ change | number:'1.1-1' }}%
-              </span>
-            </p>
+      <div class="bg-transparent dark:bg-transparent kpi-card-content">
+        <!-- Top section with icon on left, title on right -->
+        <div class="flex items-center justify-between mb-2 bg-transparent dark:bg-transparent">
+          <div *ngIf="icon" class="rounded-md bg-blue-50 dark:bg-primary-900/40 p-2 flex items-center justify-center">
+            <i [class]="'pi ' + icon + ' text-blue-600 dark:text-primary-300 text-xl'"></i>
           </div>
-          <p *ngIf="subtitle" class="mt-1 text-sm text-gray-500 dark:text-gray-300">{{ subtitle }}</p>
+          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">{{ title }}</h3>
         </div>
         
-        <div *ngIf="icon" class="rounded-md bg-primary-50 dark:bg-primary-900/40 p-3 flex items-center justify-center">
-          <i [class]="'pi ' + icon + ' text-primary-600 dark:text-primary-300 text-xl'"></i>
+        <!-- Value section - centered and 25% larger -->
+        <div class="flex flex-col items-center bg-transparent dark:bg-transparent my-2">
+          <p class="text-4xl font-bold text-gray-900 dark:text-white">
+            {{ prefix }}{{ value | number:format }}{{ suffix }}
+          </p>
+          
+          <!-- Change and subtitle -->
+          <div class="flex items-center mt-1">
+            <span *ngIf="change !== undefined" class="text-sm font-semibold mr-2" [class.positive-change]="change > 0" [class.negative-change]="change < 0" [class.neutral-change]="change === 0">
+              <i *ngIf="change > 0" class="pi pi-arrow-up mr-1"></i>
+              <i *ngIf="change < 0" class="pi pi-arrow-down mr-1"></i>
+              {{ change > 0 ? '+' : '' }}{{ change | number:'1.1-1' }}%
+            </span>
+            <p *ngIf="subtitle" class="text-sm text-gray-500 dark:text-gray-300">{{ subtitle }}</p>
+          </div>
         </div>
       </div>
     </app-card>
   `,
-  styles: ``
+  styles: `
+    :host {
+      display: block;
+      height: 100%;
+    }
+
+    :host ::ng-deep app-card {
+      height: 100%;
+    }
+    
+    :host ::ng-deep app-card > div {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .kpi-card-content {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    :host ::ng-deep .dark p,
+    :host ::ng-deep .dark div,
+    :host ::ng-deep .dark span {
+      background-color: transparent !important;
+    }
+    
+    :host ::ng-deep h3, 
+    :host ::ng-deep p, 
+    :host ::ng-deep div,
+    :host ::ng-deep span {
+      background-color: transparent;
+    }
+    
+    .positive-change {
+      color: #16a34a !important; /* green-600 */
+    }
+    
+    .negative-change {
+      color: #dc2626 !important; /* red-600 */
+    }
+    
+    .neutral-change {
+      color: #6b7280 !important; /* gray-500 */
+    }
+    
+    .dark .positive-change {
+      color: #4ade80 !important; /* green-400 */
+    }
+    
+    .dark .negative-change {
+      color: #f87171 !important; /* red-400 */
+    }
+    
+    .dark .neutral-change {
+      color: #9ca3af !important; /* gray-400 */
+    }
+  `
 })
 export class KpiCardComponent {
   @Input() title = '';

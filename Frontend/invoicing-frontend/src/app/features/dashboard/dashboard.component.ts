@@ -18,17 +18,24 @@ import { ButtonComponent } from '../../shared/components/button/button.component
           <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Dashboard</h1>
           <p class="text-sm text-gray-500 dark:text-gray-400">Overview of your invoicing activity</p>
         </div>
-        <div>
-          <app-button 
-            label="New Invoice" 
-            icon="pi pi-plus" 
+        <div class="flex space-x-3">
+          <button 
+            class="action-button"
             routerLink="/invoices/new"
-          ></app-button>
+          >
+            New Invoice
+          </button>
+          <button 
+            class="action-button"
+            routerLink="/clients/new"
+          >
+            New Client
+          </button>
         </div>
       </div>
       
       <!-- KPI Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <app-kpi-card
           title="Total Revenue"
           [value]="125000"
@@ -50,7 +57,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
         <app-kpi-card
           title="Invoices Created"
           [value]="24"
-          icon="pi-file-invoice"
+          icon="pi-file"
           [change]="12"
           subtitle="Last 30 days"
         ></app-kpi-card>
@@ -66,55 +73,65 @@ import { ButtonComponent } from '../../shared/components/button/button.component
         ></app-kpi-card>
       </div>
       
-      <!-- Placeholder for Charts and Tables -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <app-card 
-          class="col-span-3 lg:col-span-2"
-          title="Recent Invoices"
-          subtitle="Last 5 invoices created"
-        >
-          <div class="text-center py-16 text-gray-500 dark:text-gray-400">
-            <p class="mb-4">Invoice history will be displayed here</p>
-            <app-button 
-              label="View All Invoices" 
-              variant="secondary"
-              routerLink="/invoices"
-            ></app-button>
-          </div>
-        </app-card>
-        
-        <app-card
-          class="col-span-3 lg:col-span-1"
-          title="Quick Actions"
-        >
-          <div class="space-y-3">
-            <div class="flex flex-col gap-3">
-              <app-button 
-                label="Create New Invoice" 
-                icon="pi pi-file"
-                routerLink="/invoices/new"
-                [fullWidth]="true"
-              ></app-button>
-              
-              <app-button 
-                label="Add New Client" 
-                icon="pi pi-user"
-                routerLink="/clients/new"
-                variant="secondary"
-                [fullWidth]="true"
-              ></app-button>
-            </div>
+      <!-- Placeholder for future chart implementation -->
+      <div class="mb-8">
+        <app-card>
+          <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4 pl-2">Monthly Revenue</h2>
+          <div class="flex items-center justify-center h-64 bg-gray-100 dark:bg-gray-700 rounded-md">
+            <p class="text-gray-500 dark:text-gray-400">Chart will be implemented later</p>
           </div>
         </app-card>
       </div>
+      
+      <!-- Recent Invoices -->
+      <app-card 
+        title="Recent Invoices"
+        subtitle="Last 5 invoices created"
+      >
+        <div class="text-center py-16 text-gray-500 dark:text-gray-400">
+          <p class="mb-4">Invoice history will be displayed here</p>
+          <app-button 
+            label="View All Invoices" 
+            variant="secondary"
+            routerLink="/invoices"
+          ></app-button>
+        </div>
+      </app-card>
     </div>
   `,
-  styles: ``
+  styles: `
+    .dashboard-container {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+    
+    .action-button {
+      padding: 0.625rem 1rem;
+      background-color: var(--green-600, #16a34a);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .action-button:hover {
+      background-color: var(--green-700, #15803d);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+    
+    .action-button:active {
+      transform: scale(1.05);
+      box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    }
+  `
 })
 export class DashboardComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    // Load dashboard data
+    // Initialization logic
   }
 } 
