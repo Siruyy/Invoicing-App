@@ -18,7 +18,7 @@ export class ThemeService {
   }
   
   setTheme(isDarkMode: boolean): void {
-    // Update UI
+    // Update UI by adding/removing class from document root element (html)
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
     } else {
@@ -28,6 +28,10 @@ export class ThemeService {
     // Update state and save preference
     this.darkMode.next(isDarkMode);
     localStorage.setItem('darkMode', String(isDarkMode));
+    
+    // Log for debugging
+    console.log('Theme changed:', isDarkMode ? 'dark' : 'light');
+    console.log('Dark class exists:', document.documentElement.classList.contains('dark'));
   }
   
   private getInitialThemeState(): boolean {
@@ -39,5 +43,10 @@ export class ThemeService {
     
     // Otherwise, check system preference
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  
+  // Helper method to check current mode
+  isDarkMode(): boolean {
+    return this.darkMode.value;
   }
 } 
