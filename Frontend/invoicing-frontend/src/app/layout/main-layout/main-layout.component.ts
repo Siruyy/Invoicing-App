@@ -10,7 +10,7 @@ import { FooterComponent } from '../footer/footer.component';
   standalone: true,
   imports: [CommonModule, RouterOutlet, HeaderComponent, SidebarComponent, FooterComponent],
   template: `
-    <div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-800">
+    <div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       <!-- Header -->
       <app-header></app-header>
       
@@ -27,6 +27,11 @@ import { FooterComponent } from '../footer/footer.component';
       <!-- Footer -->
       <app-footer></app-footer>
     </div>
+  `,
+  styles: `
+    div {
+      transition: background-color 0.3s ease;
+    }
   `
 })
 export class MainLayoutComponent { } 

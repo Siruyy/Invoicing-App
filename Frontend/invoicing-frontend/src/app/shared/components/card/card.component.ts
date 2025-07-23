@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div 
-      class="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden"
+      class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden transition-all shadow-sm hover:shadow-md dark:shadow-gray-900"
       [ngClass]="{'p-6': !noPadding}"
     >
       <div *ngIf="title || subtitle" class="mb-4">
@@ -22,7 +22,11 @@ import { CommonModule } from '@angular/common';
       <ng-content></ng-content>
     </div>
   `,
-  styles: ``
+  styles: `
+    div {
+      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+  `
 })
 export class CardComponent {
   @Input() title?: string;

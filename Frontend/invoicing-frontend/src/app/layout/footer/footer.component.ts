@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-4">
+    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-4 transition-colors">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center">
           <div class="text-sm text-gray-500 dark:text-gray-400">
@@ -18,6 +18,11 @@ import { CommonModule } from '@angular/common';
         </div>
       </div>
     </footer>
+  `,
+  styles: `
+    footer {
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
   `
 })
 export class FooterComponent {

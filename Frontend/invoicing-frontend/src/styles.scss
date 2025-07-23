@@ -31,12 +31,12 @@
   --surface-c: #2b2b2b;
   --surface-d: #383838;
   --surface-e: #1e1e1e;
-  --text-color: #e9ecef;
-  --text-color-secondary: #adb5bd;
-  --primary-color: #007FFF;
+  --text-color: #ffffff;
+  --text-color-secondary: #d1d5db;
+  --primary-color: #3b82f6;
   --primary-color-text: #ffffff;
   --highlight-bg: #1A2A45;
-  --highlight-text-color: #66adff;
+  --highlight-text-color: #90caf9;
 }
 
 /* Global custom styles */
@@ -53,5 +53,83 @@ body {
 
 /* Smooth transitions when switching between light and dark mode */
 body * {
-  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Additional overrides for dark mode */
+.dark .text-gray-900 {
+  color: #ffffff !important;
+}
+
+.dark .text-gray-800 {
+  color: #f3f4f6 !important;
+}
+
+.dark .text-gray-700 {
+  color: #e5e7eb !important;
+}
+
+.dark .text-gray-600 {
+  color: #d1d5db !important;
+}
+
+.dark .text-gray-500 {
+  color: #9ca3af !important;
+}
+
+/* Make sure primary colors are visible in dark mode */
+.dark .text-primary-600 {
+  color: #60a5fa !important;
+}
+
+.dark .text-primary-500 {
+  color: #3b82f6 !important;
+}
+
+/* Ensure positive/negative colors have proper contrast */
+.dark .text-green-600 {
+  color: #4ade80 !important;
+}
+
+.dark .text-red-600 {
+  color: #f87171 !important;
+}
+
+/* Fix background colors for buttons and interactive elements */
+.dark button.bg-primary-600,
+.dark a.bg-primary-600 {
+  background-color: #2563eb !important;
+  color: white !important;
+}
+
+.dark button.bg-primary-500,
+.dark a.bg-primary-500 {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+/* Light mode shadow improvements */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Dark mode shadow improvements */
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.dark .shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.dark .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
