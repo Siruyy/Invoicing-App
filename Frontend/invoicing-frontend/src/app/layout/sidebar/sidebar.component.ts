@@ -7,7 +7,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
-    <aside class="w-64 bg-white dark:bg-gray-900 shadow-lg h-full border-r border-gray-200 dark:border-gray-800 transition-colors">
+    <aside class="h-full border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg transition-colors">
       <div class="p-4">
         <!-- Sidebar Navigation -->
         <nav class="mt-4">
@@ -15,9 +15,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             <li>
               <a 
                 routerLink="/dashboard" 
-                routerLinkActive="bg-primary-50 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 font-medium"
+                routerLinkActive="bg-primary-50 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 font-medium border-l-4 border-primary-500 dark:border-primary-400"
                 [routerLinkActiveOptions]="{exact: true}"
-                class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
               >
                 <i class="pi pi-home text-lg mr-3"></i>
                 <span>Dashboard</span>
@@ -26,8 +26,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             <li>
               <a 
                 routerLink="/clients" 
-                routerLinkActive="bg-primary-50 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 font-medium"
-                class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                routerLinkActive="bg-primary-50 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 font-medium border-l-4 border-primary-500 dark:border-primary-400"
+                class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
               >
                 <i class="pi pi-users text-lg mr-3"></i>
                 <span>Clients</span>
@@ -36,8 +36,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             <li>
               <a 
                 routerLink="/invoices" 
-                routerLinkActive="bg-primary-50 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 font-medium"
-                class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                routerLinkActive="bg-primary-50 dark:bg-primary-900/50 text-primary-600 dark:text-primary-400 font-medium border-l-4 border-primary-500 dark:border-primary-400"
+                class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
               >
                 <i class="pi pi-file-invoice text-lg mr-3"></i>
                 <span>Invoices</span>
@@ -45,29 +45,6 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             </li>
           </ul>
         </nav>
-        
-        <!-- Quick Actions -->
-        <div class="mt-8">
-          <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-4 mb-2">
-            Quick Actions
-          </h3>
-          <div class="mt-2 space-y-2">
-            <a 
-              routerLink="/invoices/new" 
-              class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-            >
-              <i class="pi pi-plus text-lg mr-3"></i>
-              <span>New Invoice</span>
-            </a>
-            <a 
-              routerLink="/clients/new" 
-              class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-            >
-              <i class="pi pi-plus text-lg mr-3"></i>
-              <span>New Client</span>
-            </a>
-          </div>
-        </div>
       </div>
     </aside>
   `,
@@ -78,6 +55,15 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     
     a {
       transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    a.border-l-4 {
+      border-left-width: 4px;
+    }
+    
+    /* Ensure active items have correct text color in light mode */
+    a.text-primary-600 {
+      color: #3b82f6 !important;
     }
   `
 })

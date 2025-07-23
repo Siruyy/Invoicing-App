@@ -18,10 +18,10 @@
   --surface-e: #ffffff;
   --text-color: #495057;
   --text-color-secondary: #6c757d;
-  --primary-color: #007FFF;
+  --primary-color: #2563eb; /* Updated to match blue-600 */
   --primary-color-text: #ffffff;
   --highlight-bg: #EEF2FF;
-  --highlight-text-color: #007FFF;
+  --highlight-text-color: #2563eb; /* Updated to match blue-600 */
 }
 
 /* Dark mode variables */
@@ -57,6 +57,18 @@ body * {
 }
 
 /* Additional overrides for dark mode */
+.dark .bg-white {
+  background-color: #121212 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #1e1e1e !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #2b2b2b !important;
+}
+
 .dark .text-gray-900 {
   color: #ffffff !important;
 }
@@ -77,6 +89,10 @@ body * {
   color: #9ca3af !important;
 }
 
+.dark .border-gray-200 {
+  border-color: #374151 !important;
+}
+
 /* Make sure primary colors are visible in dark mode */
 .dark .text-primary-600 {
   color: #60a5fa !important;
@@ -86,6 +102,19 @@ body * {
   color: #3b82f6 !important;
 }
 
+/* Light mode blue color overrides */
+.text-blue-600 {
+  color: #2563eb !important;
+}
+
+.border-blue-500 {
+  border-color: #3b82f6 !important;
+}
+
+.hover\:text-blue-600:hover {
+  color: #2563eb !important;
+}
+
 /* Ensure positive/negative colors have proper contrast */
 .dark .text-green-600 {
   color: #4ade80 !important;
@@ -93,6 +122,31 @@ body * {
 
 .dark .text-red-600 {
   color: #f87171 !important;
+}
+
+/* Percentage change colors */
+.positive-change {
+  color: #16a34a !important; /* green-600 */
+}
+
+.negative-change {
+  color: #dc2626 !important; /* red-600 */
+}
+
+.neutral-change {
+  color: #6b7280 !important; /* gray-500 */
+}
+
+.dark .positive-change {
+  color: #4ade80 !important; /* green-400 */
+}
+
+.dark .negative-change {
+  color: #f87171 !important; /* red-400 */
+}
+
+.dark .neutral-change {
+  color: #9ca3af !important; /* gray-400 */
 }
 
 /* Fix background colors for buttons and interactive elements */
@@ -121,15 +175,60 @@ body * {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
 /* Dark mode shadow improvements */
 .dark .shadow-sm {
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
 }
 
 .dark .shadow {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
 }
 
 .dark .shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+}
+
+.dark .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
+}
+
+/* Fix sidebar in dark mode */
+.dark app-sidebar aside {
+  background-color: #121212 !important;
+  border-color: #374151 !important;
+}
+
+/* Fix header in dark mode */
+.dark app-header header {
+  background-color: #121212 !important;
+  border-color: #374151 !important;
+}
+
+/* Fix footer in dark mode */
+.dark app-footer footer {
+  background-color: #121212 !important;
+  border-color: #374151 !important;
+}
+
+/* Fix cards in dark mode */
+.dark app-card div {
+  background-color: #1e1e1e !important;
+  border-color: #374151 !important;
+}
+
+/* Active sidebar items in light mode */
+app-sidebar a.bg-primary-50 {
+  color: #2563eb !important;
+}
+
+/* Fix inner elements in dark mode cards */
+.dark app-kpi-card p,
+.dark app-kpi-card div,
+.dark app-kpi-card span,
+.dark app-card div div {
+  background-color: transparent !important;
 }
