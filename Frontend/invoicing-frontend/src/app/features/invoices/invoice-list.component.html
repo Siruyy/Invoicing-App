@@ -27,7 +27,7 @@
     </div>
 
     <!-- Table -->
-    <p-table [value]="invoices" [paginator]="true" [rows]="10" class="invoice-table" [rowHover]="false">
+    <p-table [value]="invoices" [paginator]="true" [rows]="10" class="invoice-table" [rowHover]="true" styleClass="p-datatable-sm custom-table"
       <ng-template pTemplate="header">
         <tr>
           <th pSortableColumn="invoiceNumber">Invoice #<p-sortIcon field="invoiceNumber"></p-sortIcon></th>
@@ -40,7 +40,7 @@
       </ng-template>
 
       <ng-template pTemplate="body" let-row>
-        <tr (click)="goTo(row)" class="row-click cursor-pointer">
+        <tr (click)="goTo(row)" class="invoice-row cursor-pointer">
           <td>{{ row.invoiceNumber }}</td>
           <td>{{ row.client.name }}</td>
           <td>{{ row.issueDate | date:'MMM d, y' }}</td>
