@@ -1,0 +1,126 @@
+.client-form-container {
+  margin-bottom: 2rem;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+  color: var(--gray-700);
+  font-size: 1.125rem;
+  position: relative;
+  
+  &:after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 50px;
+    height: 2px;
+    background-color: var(--primary-color);
+  }
+}
+
+.field-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.field {
+  flex: 1;
+  margin-bottom: 1rem;
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+  }
+  
+  small.p-error {
+    color: var(--red-500);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+}
+
+.form-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--surface-200);
+  display: flex;
+  justify-content: flex-end;
+}
+
+// Interactive states
+:host ::ng-deep {
+  .p-button {
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+    
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+  
+  .p-inputtext, .p-dropdown, .p-inputtextarea {
+    transition: border-color 0.2s, box-shadow 0.2s;
+    
+    &:hover:not(.p-disabled):not(.p-invalid) {
+      border-color: var(--primary-color);
+    }
+    
+    &:focus:not(.p-disabled):not(.p-invalid) {
+      box-shadow: 0 0 0 1px var(--primary-color-light);
+      border-color: var(--primary-color);
+    }
+  }
+}
+
+// Dark theme overrides
+:host-context(.dark) {
+  .section-title, .field label {
+    color: var(--gray-300);
+  }
+  
+  .section-title:after {
+    background-color: var(--primary-200);
+  }
+  
+  .form-footer {
+    border-top: 1px solid var(--surface-700);
+  }
+} 

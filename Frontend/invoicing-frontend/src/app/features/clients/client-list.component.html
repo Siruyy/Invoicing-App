@@ -1,0 +1,102 @@
+<app-card class="strong-shadow" [noPadding]="false">
+  <div class="client-list-container">
+    <div class="header-row">
+      <h1 class="title">Clients</h1>
+      <button pButton type="button" label="Add Client" class="green-btn" routerLink="/clients/new"></button>
+    </div>
+    
+    <!-- Search bar -->
+    <div class="search-container">
+      <span class="p-input-icon-left search-field">
+        <i class="pi pi-search"></i>
+        <input 
+          type="text" 
+          pInputText 
+          placeholder="Search clients..." 
+          [(ngModel)]="globalFilter" 
+        />
+      </span>
+    </div>
+    
+    <!-- Loading state -->
+    <div *ngIf="loading" class="loading-container">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      <p>Loading clients...</p>
+    </div>
+    
+    <!-- Client Table -->
+    <p-table 
+      [value]="clients" 
+      [paginator]="true" 
+      [rows]="10" 
+      [rowsPerPageOptions]="[5, 10, 25, 50]"
+      [filterDelay]="0"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      styleClass="p-datatable-sm p-datatable-striped"
+      *ngIf="!loading"
+      [rowHover]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="name">Name <p-sortIcon field="name"></p-sortIcon></th>
+          <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+          <th pSortableColumn="phone">Phone <p-sortIcon field="phone"></p-sortIcon></th>
+          <th pSortableColumn="companyName">Company <p-sortIcon field="companyName"></p-sortIcon></th>
+          <th style="width:10rem">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-client>
+        <tr (click)="viewClient(client)" class="client-row">
+          <td>{{ client.name }}</td>
+          <td>{{ client.email }}</td>
+          <td>{{ client.phone || 'N/A' }}</td>
+          <td>{{ client.companyName || 'N/A' }}</td>
+          <td>
+            <div class="action-buttons">
+              <button 
+                pButton 
+                pRipple 
+                type="button" 
+                icon="pi pi-pencil" 
+                class="p-button-rounded p-button-text mr-2"
+                (click)="editClient(client); $event.stopPropagation()"
+                pTooltip="Edit"
+              ></button>
+              <button 
+                pButton 
+                pRipple 
+                type="button" 
+                icon="pi pi-trash" 
+                class="p-button-rounded p-button-text p-button-danger"
+                (click)="confirmDeleteClient($event, client)"
+                pTooltip="Delete"
+              ></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center p-4">
+            <div class="empty-state">
+              <i class="pi pi-users mb-3" style="font-size: 2rem"></i>
+              <p class="mb-0">No clients found</p>
+              <p class="text-sm text-muted">Create your first client to get started</p>
+              <button 
+                pButton 
+                type="button" 
+                label="Add Client" 
+                class="green-btn mt-2" 
+                routerLink="/clients/new">
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Confirmation dialog and toast -->
+  <p-confirmDialog></p-confirmDialog>
+  <p-toast></p-toast>
+</app-card> 

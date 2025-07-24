@@ -1,0 +1,200 @@
+.field {
+  min-width: 150px;
+}
+
+.list-wrapper {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header-row {
+  @apply flex items-center justify-between;
+}
+.title {
+  @apply text-2xl font-semibold text-gray-900;
+}
+
+.filter-bar {
+  @apply flex flex-wrap gap-4 items-end;
+}
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 160px;
+}
+.search-box {
+  min-width: 200px;
+}
+.spacer {
+  flex: 1 1 auto;
+}
+
+.invoice-table ::ng-deep td {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.invoice-table ::ng-deep .p-datatable-tbody > tr > td {
+  border-bottom: 1px solid #d1d5db; /* gray-300 */
+}
+
+.invoice-table ::ng-deep .p-datatable-tbody > tr:hover {
+  background: transparent; /* disable row hover color */
+}
+
+.invoice-table ::ng-deep th.text-right,
+.invoice-table ::ng-deep td.text-right {
+  text-align: right;
+}
+
+.strong-shadow {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08); /* slightly stronger */
+}
+
+.green-btn {
+  @apply bg-green-600 hover:bg-green-700 text-white rounded-full px-4 py-2 font-medium;
+  border: none;
+}
+
+.filter-field.narrow {
+  min-width: 130px;
+}
+
+.search-wrap {
+  @apply flex items-center gap-2;
+}
+.search-wrap input {
+  width: 200px;
+}
+.search-icon {
+  color: #6b7280; /* gray-500 */
+}
+
+.filter-field input.p-inputtext,
+.search-wrap input.p-inputtext {
+  border-radius: 0.375rem; /* rounded-md */
+}
+
+.filter-field.narrow .p-inputtext {
+  width: 140px;
+} 
+
+:host ::ng-deep .p-datepicker {
+  background: #ffffff;
+  color: #374151; /* gray-700 */
+}
+.dark :host ::ng-deep .p-datepicker {
+  background: #1e1e1e;
+  color: #d1d5db; /* gray-300 */
+}
+
+:host ::ng-deep .p-dropdown-panel {
+  background: #ffffff;
+}
+.dark :host ::ng-deep .p-dropdown-panel {
+  background: #1e1e1e;
+} 
+
+.dark :host ::ng-deep .p-inputtext {
+  background-color: #1e1e1e !important;
+  color: #d1d5db;
+  border-color: #374151;
+}
+.dark :host ::ng-deep .p-inputtext::placeholder {
+  color: #9ca3af;
+}
+
+.dark :host ::ng-deep .p-calendar {
+  background-color: #1e1e1e;
+}
+
+.dark :host ::ng-deep .p-dropdown {
+  background-color: #1e1e1e;
+}
+.dark :host ::ng-deep .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  background-color: #1e1e1e;
+} 
+
+.dark :host ::ng-deep .p-datepicker,
+.dark :host ::ng-deep .p-datepicker-header,
+.dark :host ::ng-deep .p-datepicker-calendar {
+  background-color: #1e1e1e;
+}
+
+:host ::ng-deep .p-dropdown-panel {
+  min-width: 160px;
+}
+.dark :host ::ng-deep .p-dropdown-panel .p-dropdown-item:hover {
+  background-color: #374151;
+  color: #f9fafb;
+} 
+
+:host ::ng-deep .p-dropdown-panel .p-dropdown-item:hover {
+  background-color: #666666; /* gray-100 */
+}
+
+:host ::ng-deep .p-datepicker-calendar td span:hover {
+  background-color: #a7a7a7; /* gray-200 */
+}
+.dark :host ::ng-deep .p-datepicker-calendar td span:hover {
+  background-color: #374151; /* gray-700 */
+} 
+
+:host ::ng-deep .p-dropdown:hover .p-inputtext,
+:host ::ng-deep .p-calendar:hover .p-inputtext {
+  border-color: #9ca3af; /* gray-400 */
+}
+:host ::ng-deep .p-dropdown.p-focus .p-inputtext,
+:host ::ng-deep .p-calendar.p-focus .p-inputtext {
+  border-color: #2563eb; /* blue-600 */
+  box-shadow: 0 0 0 1px #2563eb;
+} 
+
+.invoice-table ::ng-deep .p-paginator {
+  margin-top: 1rem;
+  border: none;
+  background: transparent;
+  justify-content: center;
+  gap: 0.25rem;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  align-items: center;
+}
+
+.invoice-table ::ng-deep .p-paginator-pages {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: nowrap;
+}
+
+.invoice-table ::ng-deep .p-paginator .p-paginator-page,
+.invoice-table ::ng-deep .p-paginator .p-paginator-prev,
+.invoice-table ::ng-deep .p-paginator .p-paginator-next {
+  @apply rounded-full w-6 h-6 text-sm flex items-center justify-center text-gray-600 hover:bg-gray-200 cursor-pointer;
+}
+.invoice-table ::ng-deep .p-paginator .p-paginator-page.p-highlight {
+  background-color: #2563eb;
+  color: #fff;
+}
+.dark .invoice-table ::ng-deep .p-paginator .p-paginator-page,
+.dark .invoice-table ::ng-deep .p-paginator .p-paginator-prev,
+.dark .invoice-table ::ng-deep .p-paginator .p-paginator-next {
+  @apply text-gray-300 hover:bg-gray-700;
+}
+.dark .invoice-table ::ng-deep .p-paginator .p-paginator-page.p-highlight {
+  background-color: #3b82f6;
+  color: #fff;
+} 
+
+.row-click {
+  transition: background-color 0.15s ease;
+}
+.row-click:hover {
+  background-color: #999999; /* darker grey for light theme */
+}
+.dark .row-click:hover {
+  background-color: #2b2b2b; /* lighter grey for dark theme */
+} 

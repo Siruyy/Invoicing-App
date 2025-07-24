@@ -1,0 +1,166 @@
+<app-card [noPadding]="false" class="strong-shadow">
+  <div class="invoice-detail-container">
+    <!-- Loading state -->
+    <div *ngIf="loading" class="p-4 text-center">
+      <i class="pi pi-spin pi-spinner text-4xl mb-3"></i>
+      <p>Loading invoice data...</p>
+    </div>
+    
+    <!-- Error state -->
+    <div *ngIf="error && !loading" class="p-4 text-center">
+      <i class="pi pi-exclamation-triangle text-4xl mb-3 text-red-500"></i>
+      <p class="text-red-500">{{ error }}</p>
+      <button pButton type="button" label="Go Back" icon="pi pi-arrow-left" class="mt-4" routerLink="/invoices"></button>
+    </div>
+    
+    <!-- Invoice content -->
+    <div *ngIf="invoice && !loading && !error">
+      <!-- Header with actions -->
+      <div class="invoice-header">
+        <div class="flex-1">
+          <h1 class="invoice-number">{{ invoice.invoiceNumber }}</h1>
+          <div class="status-badge">
+            <p-tag [value]="invoice.status" [severity]="getStatusSeverity(invoice.status)"></p-tag>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-pencil" 
+            label="Edit" 
+            class="p-button-outlined" 
+            [routerLink]="['/invoices', invoice.id, 'edit']"
+            *ngIf="invoice.status === InvoiceStatus.DRAFT"
+          ></button>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-envelope" 
+            label="Send" 
+            class="p-button-outlined p-button-secondary" 
+            (click)="sendInvoice()"
+            *ngIf="invoice.status === InvoiceStatus.DRAFT"
+          ></button>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-check" 
+            label="Mark as Paid" 
+            class="p-button-outlined p-button-success" 
+            (click)="markAsPaid()"
+            *ngIf="invoice.status === InvoiceStatus.PENDING || invoice.status === InvoiceStatus.OVERDUE"
+          ></button>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-file-pdf" 
+            label="Download PDF" 
+            class="p-button-outlined p-button-help"
+            (click)="downloadPdf()"
+          ></button>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-trash" 
+            label="Delete" 
+            class="p-button-outlined p-button-danger"
+            (click)="confirmDelete()"
+          ></button>
+        </div>
+      </div>
+      
+      <!-- Invoice metadata -->
+      <div class="invoice-meta">
+        <div class="meta-group">
+          <div class="meta-item">
+            <div class="meta-label">Issue Date</div>
+            <div class="meta-value">{{ invoice.issueDate | date:'mediumDate' }}</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Due Date</div>
+            <div class="meta-value" [class.overdue]="invoice.status === InvoiceStatus.OVERDUE">
+              {{ invoice.dueDate | date:'mediumDate' }}
+            </div>
+          </div>
+          <div class="meta-item" *ngIf="invoice.paidAt">
+            <div class="meta-label">Paid Date</div>
+            <div class="meta-value">{{ invoice.paidAt | date:'mediumDate' }}</div>
+          </div>
+        </div>
+        
+        <div class="meta-group">
+          <div class="meta-item client-details">
+            <div class="meta-label">Client</div>
+            <div class="meta-value">
+              <div class="client-name">{{ invoice.client?.name }}</div>
+              <div class="client-email">{{ invoice.client?.email }}</div>
+              <div class="client-phone" *ngIf="invoice.client?.phone">{{ invoice.client?.phone }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Invoice items -->
+      <div class="invoice-items">
+        <h2 class="section-title">Invoice Items</h2>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th class="description-col">Description</th>
+              <th class="quantity-col">Quantity</th>
+              <th class="price-col">Unit Price</th>
+              <th class="total-col">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of invoice.items">
+              <td>{{ item.description }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.unitPrice | currency }}</td>
+              <td>{{ item.quantity * item.unitPrice | currency }}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- Invoice Totals -->
+        <div class="invoice-totals">
+          <div class="total-row">
+            <div class="total-label">Subtotal</div>
+            <div class="total-value">{{ invoice.subtotal | currency }}</div>
+          </div>
+          <div class="total-row" *ngIf="invoice.taxAmount">
+            <div class="total-label">Tax</div>
+            <div class="total-value">{{ invoice.taxAmount | currency }}</div>
+          </div>
+          <div class="total-row grand-total">
+            <div class="total-label">Total</div>
+            <div class="total-value">{{ invoice.total | currency }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Notes -->
+      <div class="invoice-notes" *ngIf="invoice.notes">
+        <h2 class="section-title">Notes</h2>
+        <div class="notes-content">
+          {{ invoice.notes }}
+        </div>
+      </div>
+      
+      <!-- Footer with return link -->
+      <div class="invoice-footer">
+        <button pButton type="button" icon="pi pi-arrow-left" label="Back to Invoices" class="p-button-text" routerLink="/invoices"></button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast and Confirmation components -->
+  <p-toast></p-toast>
+  <p-confirmDialog header="Confirm Delete" icon="pi pi-exclamation-triangle">
+    <ng-template pTemplate="footer">
+      <button pButton type="button" icon="pi pi-times" label="No" class="p-button-text"></button>
+      <button pButton type="button" icon="pi pi-check" label="Yes" class="p-button-text p-button-danger"></button>
+    </ng-template>
+  </p-confirmDialog>
+</app-card> 

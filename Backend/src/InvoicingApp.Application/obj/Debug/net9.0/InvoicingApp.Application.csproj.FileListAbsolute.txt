@@ -13,3 +13,4 @@ C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.App
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Application\obj\Debug\net9.0\refint\InvoicingApp.Application.dll
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Application\obj\Debug\net9.0\InvoicingApp.Application.pdb
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Application\obj\Debug\net9.0\ref\InvoicingApp.Application.dll
+C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Application\obj\Debug\net9.0\InvoicingApp.Application.sourcelink.json

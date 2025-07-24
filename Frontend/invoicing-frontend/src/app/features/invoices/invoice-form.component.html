@@ -1,0 +1,311 @@
+<app-card [noPadding]="false" class="strong-shadow">
+  <div class="invoice-form-container">
+    <!-- Loading state -->
+    <div *ngIf="loading" class="p-4 text-center">
+      <i class="pi pi-spin pi-spinner text-4xl mb-3"></i>
+      <p>Loading invoice data...</p>
+    </div>
+    
+    <!-- Form content -->
+    <div *ngIf="!loading" [formGroup]="invoiceForm">
+      <!-- Form header -->
+      <div class="form-header">
+        <h1 class="form-title">{{ isEditMode ? 'Edit Invoice' : 'Create New Invoice' }}</h1>
+        <div class="form-actions">
+          <button 
+            pButton 
+            type="button" 
+            label="Cancel" 
+            icon="pi pi-times" 
+            class="p-button-outlined p-button-secondary" 
+            [disabled]="saving"
+            routerLink="/invoices">
+          </button>
+          <button 
+            pButton 
+            type="button" 
+            label="Save as Draft" 
+            icon="pi pi-save" 
+            class="p-button-outlined" 
+            [loading]="saving"
+            (click)="saveAsDraft()">
+          </button>
+          <button 
+            pButton 
+            type="button" 
+            label="Save & Send" 
+            icon="pi pi-send" 
+            class="p-button" 
+            [loading]="saving"
+            (click)="saveAndSend()">
+          </button>
+        </div>
+      </div>
+      
+      <!-- Client & Invoice info section -->
+      <div class="mb-6">
+        <h2 class="section-title">Invoice Information</h2>
+        
+        <div class="field-row">
+          <div class="field field-sm">
+            <label for="invoiceNumber">Invoice Number</label>
+            <input 
+              id="invoiceNumber" 
+              type="text" 
+              pInputText 
+              formControlName="invoiceNumber" 
+              [ngClass]="{'ng-invalid ng-dirty': invoiceForm.get('invoiceNumber')?.invalid && invoiceForm.get('invoiceNumber')?.touched}" 
+            />
+            <small 
+              *ngIf="invoiceForm.get('invoiceNumber')?.invalid && invoiceForm.get('invoiceNumber')?.touched" 
+              class="p-error"
+            >
+              Invoice number is required
+            </small>
+          </div>
+          
+          <div class="field">
+            <label for="client">Client</label>
+            <p-dropdown 
+              id="client"
+              formControlName="clientId" 
+              [options]="clients" 
+              optionLabel="name" 
+              optionValue="id" 
+              placeholder="Select a client" 
+              [showClear]="true"
+              [ngClass]="{'ng-invalid ng-dirty': invoiceForm.get('clientId')?.invalid && invoiceForm.get('clientId')?.touched}"
+            >
+              <ng-template pTemplate="selectedItem">
+                <div *ngIf="invoiceForm.get('clientId')?.value">
+                  {{ getSelectedClientName() }}
+                </div>
+              </ng-template>
+              <ng-template let-client pTemplate="item">
+                <div>{{ client.name }}</div>
+              </ng-template>
+            </p-dropdown>
+            <small 
+              *ngIf="invoiceForm.get('clientId')?.invalid && invoiceForm.get('clientId')?.touched" 
+              class="p-error"
+            >
+              Client is required
+            </small>
+          </div>
+        </div>
+        
+        <div class="field-row">
+          <div class="field">
+            <label for="issueDate">Issue Date</label>
+            <p-calendar 
+              id="issueDate"
+              formControlName="issueDate" 
+              dateFormat="mm/dd/yy" 
+              [showIcon]="true"
+              [ngClass]="{'ng-invalid ng-dirty': invoiceForm.get('issueDate')?.invalid && invoiceForm.get('issueDate')?.touched}"
+            ></p-calendar>
+            <small 
+              *ngIf="invoiceForm.get('issueDate')?.invalid && invoiceForm.get('issueDate')?.touched" 
+              class="p-error"
+            >
+              Issue date is required
+            </small>
+          </div>
+          
+          <div class="field">
+            <label for="dueDate">Due Date</label>
+            <p-calendar 
+              id="dueDate"
+              formControlName="dueDate" 
+              dateFormat="mm/dd/yy" 
+              [showIcon]="true"
+              [ngClass]="{'ng-invalid ng-dirty': invoiceForm.get('dueDate')?.invalid && invoiceForm.get('dueDate')?.touched}"
+            ></p-calendar>
+            <small 
+              *ngIf="invoiceForm.get('dueDate')?.invalid && invoiceForm.get('dueDate')?.touched" 
+              class="p-error"
+            >
+              Due date is required
+            </small>
+          </div>
+          
+          <div class="field field-sm">
+            <label for="taxRate">Tax Rate (%)</label>
+            <p-inputNumber 
+              id="taxRate"
+              formControlName="taxRate" 
+              [showButtons]="false" 
+              mode="decimal" 
+              [minFractionDigits]="2" 
+              [maxFractionDigits]="2"
+            ></p-inputNumber>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Invoice Items section -->
+      <div class="mb-6">
+        <h2 class="section-title">Invoice Items</h2>
+        
+        <table class="items-table" formArrayName="items">
+          <thead>
+            <tr>
+              <th class="description-cell">Description</th>
+              <th class="quantity-cell">Quantity</th>
+              <th class="price-cell">Unit Price</th>
+              <th class="total-cell">Total</th>
+              <th class="actions-cell"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of itemsFormArray.controls; let i = index" [formGroupName]="i">
+              <td>
+                <input 
+                  type="text" 
+                  pInputText 
+                  formControlName="description" 
+                  placeholder="Item description" 
+                  class="w-full"
+                  [ngClass]="{'ng-invalid ng-dirty': item.get('description')?.invalid && item.get('description')?.touched}"
+                />
+              </td>
+              <td>
+                <p-inputNumber 
+                  formControlName="quantity" 
+                  [showButtons]="true" 
+                  buttonLayout="horizontal" 
+                  spinnerMode="horizontal" 
+                  [min]="0.01" 
+                  [step]="1" 
+                  decrementButtonClass="p-button-secondary" 
+                  incrementButtonClass="p-button-secondary" 
+                  incrementButtonIcon="pi pi-plus" 
+                  decrementButtonIcon="pi pi-minus"
+                  [ngClass]="{'ng-invalid ng-dirty': item.get('quantity')?.invalid && item.get('quantity')?.touched}"
+                ></p-inputNumber>
+              </td>
+              <td>
+                <p-inputNumber 
+                  formControlName="unitPrice" 
+                  mode="currency" 
+                  currency="USD" 
+                  locale="en-US"
+                  [ngClass]="{'ng-invalid ng-dirty': item.get('unitPrice')?.invalid && item.get('unitPrice')?.touched}"
+                ></p-inputNumber>
+              </td>
+              <td>
+                <p-inputNumber 
+                  formControlName="totalPrice" 
+                  mode="currency" 
+                  currency="USD" 
+                  locale="en-US"
+                  [readonly]="true"
+                ></p-inputNumber>
+              </td>
+              <td class="actions-cell">
+                <button 
+                  pButton 
+                  type="button" 
+                  icon="pi pi-trash" 
+                  class="p-button-rounded p-button-text p-button-danger" 
+                  (click)="removeItem(i)"
+                  *ngIf="itemsFormArray.length > 1"
+                ></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="item-actions">
+          <button 
+            pButton 
+            type="button" 
+            label="Add Item" 
+            icon="pi pi-plus" 
+            class="p-button-text" 
+            (click)="addItem()"
+          ></button>
+        </div>
+        
+        <!-- Invoice Totals -->
+        <div class="totals-container">
+          <div class="total-row">
+            <div class="label">Subtotal:</div>
+            <div class="value">{{ formatCurrency(invoiceForm.get('subtotal')?.value) }}</div>
+          </div>
+          <div class="total-row">
+            <div class="label">Tax ({{ invoiceForm.get('taxRate')?.value || 0 }}%):</div>
+            <div class="value">{{ formatCurrency(invoiceForm.get('taxAmount')?.value) }}</div>
+          </div>
+          <div class="total-row grand-total">
+            <div class="label">Total:</div>
+            <div class="value">{{ formatCurrency(invoiceForm.get('totalAmount')?.value) }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Notes section -->
+      <div class="mb-6">
+        <h2 class="section-title">Additional Information</h2>
+        
+        <div class="field">
+          <label for="notes">Notes</label>
+          <textarea 
+            id="notes" 
+            pInputTextarea 
+            formControlName="notes" 
+            rows="4" 
+            placeholder="Additional notes or payment instructions..."
+            class="w-full"
+          ></textarea>
+        </div>
+      </div>
+      
+      <!-- Form actions & autosave indicator -->
+      <div class="flex justify-between items-center mt-6">
+        <div class="autosave-indicator" [class.saving]="autoSaving">
+          <i *ngIf="autoSaving" class="pi pi-spin pi-spinner"></i>
+          <i *ngIf="lastSaved && !autoSaving" class="pi pi-check"></i>
+          <span *ngIf="autoSaving">Saving...</span>
+          <span *ngIf="lastSaved && !autoSaving">
+            Last saved: {{ lastSaved | date:'medium' }}
+          </span>
+        </div>
+        
+        <div class="form-actions">
+          <button 
+            pButton 
+            type="button" 
+            label="Cancel" 
+            icon="pi pi-times" 
+            class="p-button-outlined p-button-secondary" 
+            [disabled]="saving"
+            routerLink="/invoices">
+          </button>
+          <button 
+            pButton 
+            type="button" 
+            label="Save as Draft" 
+            icon="pi pi-save" 
+            class="p-button-outlined" 
+            [loading]="saving"
+            (click)="saveAsDraft()">
+          </button>
+          <button 
+            pButton 
+            type="button" 
+            label="Save & Send" 
+            icon="pi pi-send" 
+            class="p-button" 
+            [loading]="saving"
+            (click)="saveAndSend()">
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast and Confirmation components -->
+  <p-toast></p-toast>
+  <p-confirmDialog header="Confirmation" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+</app-card> 

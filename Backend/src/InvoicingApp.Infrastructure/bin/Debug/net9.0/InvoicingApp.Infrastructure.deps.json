@@ -649,7 +649,8 @@
       },
       "InvoicingApp.Application/1.0.0": {
         "dependencies": {
-          "InvoicingApp.Core": "1.0.0"
+          "InvoicingApp.Core": "1.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.0-preview.7.24405.7"
         },
         "runtime": {
           "InvoicingApp.Application.dll": {

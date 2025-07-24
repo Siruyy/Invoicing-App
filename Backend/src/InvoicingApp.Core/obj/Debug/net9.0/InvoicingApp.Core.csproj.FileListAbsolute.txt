@@ -9,3 +9,4 @@ C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Cor
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Core\obj\Debug\net9.0\refint\InvoicingApp.Core.dll
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Core\obj\Debug\net9.0\InvoicingApp.Core.pdb
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Core\obj\Debug\net9.0\ref\InvoicingApp.Core.dll
+C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Core\obj\Debug\net9.0\InvoicingApp.Core.sourcelink.json

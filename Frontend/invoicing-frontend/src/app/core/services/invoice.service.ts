@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { ApiService } from './api.service';
 import { Invoice, InvoiceStatus } from '../models/invoice.model';
 import { HttpParams } from '@angular/common/http';
@@ -56,5 +56,17 @@ export class InvoiceService {
   
   generateInvoicePdf(id: number): Observable<Blob> {
     return this.api.get<Blob>(`/invoices/${id}/pdf`);
+  }
+
+  generateInvoiceNumber(): Observable<string> {
+    // Call the backend API to generate an invoice number
+    return this.api.get<string>('/invoices/generate-number');
+    
+    // Fallback if API is not available yet
+    // return of(`INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`);
+  }
+
+  saveDraft(invoice: Invoice): Observable<Invoice> {
+    return this.api.post<Invoice>('/invoices/drafts', invoice);
   }
 } 

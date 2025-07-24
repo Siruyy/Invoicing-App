@@ -17,3 +17,4 @@ C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Inf
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Infrastructure\obj\Debug\net9.0\InvoicingApp.Infrastructure.pdb
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Infrastructure\obj\Debug\net9.0\InvoicingApp.Infrastructure.genruntimeconfig.cache
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Infrastructure\obj\Debug\net9.0\ref\InvoicingApp.Infrastructure.dll
+C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Infrastructure\obj\Debug\net9.0\InvoicingApp.Infrastructure.sourcelink.json
