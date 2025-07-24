@@ -399,15 +399,75 @@ app-sidebar a.bg-primary-50 {
   .p-dialog-header {
     border-bottom: 1px solid var(--surface-d);
     padding: 1.25rem;
+    
+    .p-dialog-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    
+    .p-dialog-header-icon {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      
+      &:hover {
+        background-color: var(--surface-c);
+      }
+    }
   }
   
   .p-dialog-content {
-    padding: 1.25rem;
+    padding: 1.5rem;
+    
+    .p-confirm-dialog-message {
+      margin-left: 0.5rem;
+      line-height: 1.5;
+      font-size: 1rem;
+    }
+    
+    .pi-exclamation-triangle {
+      color: #f59e0b; /* amber-500 */
+      font-size: 1.5rem;
+      margin-right: 0.5rem;
+    }
   }
   
   .p-dialog-footer {
     border-top: 1px solid var(--surface-d);
     padding: 1.25rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    
+    .p-button {
+      min-width: 6rem;
+    }
+    
+    .p-confirm-dialog-reject {
+      background-color: transparent;
+      border: 1px solid var(--surface-d);
+      color: var(--text-color);
+      
+      &:hover {
+        background-color: var(--surface-c);
+        border-color: var(--surface-d);
+      }
+    }
+    
+    .p-confirm-dialog-accept {
+      background-color: #ef4444; /* red-500 */
+      border-color: #ef4444;
+      
+      &:hover {
+        background-color: #dc2626; /* red-600 */
+        border-color: #dc2626;
+      }
+      
+      &:active {
+        background-color: #b91c1c; /* red-700 */
+        border-color: #b91c1c;
+      }
+    }
   }
 }
 
@@ -433,10 +493,43 @@ app-sidebar a.bg-primary-50 {
   
   .p-dialog-header {
     border-bottom: 1px solid #3a3a3a;
+    
+    .p-dialog-header-icon {
+      &:hover {
+        background-color: #3a3a3a;
+      }
+    }
+  }
+  
+  .p-dialog-content {
+    .pi-exclamation-triangle {
+      color: #fbbf24; /* amber-400 - brighter in dark mode */
+    }
   }
   
   .p-dialog-footer {
     border-top: 1px solid #3a3a3a;
+    
+    .p-confirm-dialog-reject {
+      background-color: transparent;
+      border: 1px solid #3a3a3a;
+      color: #e9e9e9;
+      
+      &:hover {
+        background-color: #3a3a3a;
+        border-color: #4a4a4a;
+      }
+    }
+    
+    .p-confirm-dialog-accept {
+      background-color: #ef4444; /* red-500 */
+      border-color: #ef4444;
+      
+      &:hover {
+        background-color: #dc2626; /* red-600 */
+        border-color: #dc2626;
+      }
+    }
   }
 }
 
