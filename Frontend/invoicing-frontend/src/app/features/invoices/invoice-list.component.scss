@@ -32,22 +32,62 @@
   flex: 1 1 auto;
 }
 
-.invoice-table ::ng-deep td {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.invoice-table ::ng-deep .p-datatable-tbody > tr > td {
-  border-bottom: 1px solid #d1d5db; /* gray-300 */
-}
-
-.invoice-table ::ng-deep .p-datatable-tbody > tr:hover {
-  background: transparent; /* disable row hover color */
-}
-
-.invoice-table ::ng-deep th.text-right,
-.invoice-table ::ng-deep td.text-right {
-  text-align: right;
+.invoice-table {
+  &::ng-deep td {
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+    vertical-align: middle;
+  }
+  
+  &::ng-deep .p-datatable-wrapper {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  &::ng-deep .p-datatable-thead > tr > th {
+    background-color: var(--surface-b);
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--surface-d);
+    font-weight: 600;
+  }
+  
+  &::ng-deep .p-datatable-tbody > tr {
+    border-bottom: 1px solid var(--surface-d);
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    
+    &:nth-child(even) {
+      background-color: var(--surface-b);
+    }
+    
+    &:hover {
+      background-color: var(--highlight-bg) !important; /* Override PrimeNG hover */
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+      transform: translateY(-1px);
+    }
+    
+    &:active {
+      background-color: var(--surface-200) !important;
+      transform: scale(0.995);
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+  }
+  
+  &::ng-deep .p-datatable-tbody > tr > td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--surface-d);
+  }
+  
+  &::ng-deep th.text-right,
+  &::ng-deep td.text-right {
+    text-align: right;
+  }
+  
+  &::ng-deep .p-paginator {
+    background-color: var(--surface-b);
+    border-top: 1px solid var(--surface-d);
+    padding: 0.75rem 1rem;
+  }
 }
 
 .strong-shadow {
@@ -80,7 +120,26 @@
 
 .filter-field.narrow .p-inputtext {
   width: 140px;
-} 
+}
+
+.invoice-row {
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+  padding: 1rem 0.5rem;
+  border-bottom: 1px solid var(--surface-d);
+  
+  &:hover {
+    background-color: var(--highlight-bg);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    background-color: var(--surface-200);
+    transform: scale(0.995);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+}
 
 :host ::ng-deep .p-datepicker {
   background: #ffffff;
