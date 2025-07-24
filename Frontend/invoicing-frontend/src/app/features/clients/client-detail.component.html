@@ -78,24 +78,48 @@
         </p-card>
         
         <!-- Address Information -->
-        <p-card header="Address Information" styleClass="detail-card" *ngIf="client.address">
+        <p-card header="Address Information" styleClass="detail-card" *ngIf="client.address || client.city">
           <div class="info-group">
-            <div class="info-row" *ngIf="client.address.street">
-              <span class="label">Street:</span>
-              <span class="value">{{ client.address.street }}</span>
-            </div>
-            <div class="info-row" *ngIf="client.address.city || client.address.state">
-              <span class="label">City/State:</span>
-              <span class="value">{{ client.address.city }}{{ client.address.city && client.address.state ? ', ' : '' }}{{ client.address.state }}</span>
-            </div>
-            <div class="info-row" *ngIf="client.address.zipCode">
-              <span class="label">Zip/Postal Code:</span>
-              <span class="value">{{ client.address.zipCode }}</span>
-            </div>
-            <div class="info-row" *ngIf="client.address.country">
-              <span class="label">Country:</span>
-              <span class="value">{{ client.address.country }}</span>
-            </div>
+            <!-- Handle address as object or string -->
+            <ng-container *ngIf="client.address && isAddressObject(client.address); else flatAddress">
+              <!-- Address is an object -->
+              <div class="info-row" *ngIf="client.address.street">
+                <span class="label">Street:</span>
+                <span class="value">{{ client.address.street }}</span>
+              </div>
+              <div class="info-row" *ngIf="client.address.city || client.address.state">
+                <span class="label">City/State:</span>
+                <span class="value">{{ client.address.city }}{{ client.address.city && client.address.state ? ', ' : '' }}{{ client.address.state }}</span>
+              </div>
+              <div class="info-row" *ngIf="client.address.zipCode">
+                <span class="label">Zip/Postal Code:</span>
+                <span class="value">{{ client.address.zipCode }}</span>
+              </div>
+              <div class="info-row" *ngIf="client.address.country">
+                <span class="label">Country:</span>
+                <span class="value">{{ client.address.country }}</span>
+              </div>
+            </ng-container>
+            
+            <!-- Handle flat address fields (from backend) -->
+            <ng-template #flatAddress>
+              <div class="info-row" *ngIf="client.address">
+                <span class="label">Street:</span>
+                <span class="value">{{ client.address }}</span>
+              </div>
+              <div class="info-row" *ngIf="client.city || client.state">
+                <span class="label">City/State:</span>
+                <span class="value">{{ client.city }}{{ client.city && client.state ? ', ' : '' }}{{ client.state }}</span>
+              </div>
+              <div class="info-row" *ngIf="client.zipCode">
+                <span class="label">Zip/Postal Code:</span>
+                <span class="value">{{ client.zipCode }}</span>
+              </div>
+              <div class="info-row" *ngIf="client.country">
+                <span class="label">Country:</span>
+                <span class="value">{{ client.country }}</span>
+              </div>
+            </ng-template>
           </div>
         </p-card>
         

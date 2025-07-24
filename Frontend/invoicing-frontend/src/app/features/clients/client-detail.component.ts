@@ -186,4 +186,19 @@ export class ClientDetailComponent implements OnInit, OnDestroy {
         return "info";
     }
   }
+  
+  // Helper method to check if the address is an object with nested properties
+  // Using TypeScript type predicate for better type checking
+  isAddressObject(address: any): address is {
+    street?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+  } {
+    return address && typeof address === 'object' && 
+           ('street' in address || 'city' in address || 
+            'state' in address || 'zipCode' in address || 
+            'country' in address);
+  }
 } 
