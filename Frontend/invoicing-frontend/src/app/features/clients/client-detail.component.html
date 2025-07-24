@@ -1,0 +1,182 @@
+<app-card [noPadding]="false" class="strong-shadow">
+  <div class="client-detail-container">
+    <!-- Loading state -->
+    <div *ngIf="loading" class="p-4 text-center">
+      <i class="pi pi-spin pi-spinner text-4xl mb-3"></i>
+      <p>Loading client data...</p>
+    </div>
+    
+    <!-- Error state -->
+    <div *ngIf="error && !loading" class="p-4 text-center">
+      <i class="pi pi-exclamation-triangle text-4xl mb-3 text-red-500"></i>
+      <p class="text-red-500">{{ error }}</p>
+      <button pButton type="button" label="Go Back" icon="pi pi-arrow-left" class="mt-4" routerLink="/clients"></button>
+    </div>
+    
+    <!-- Client content -->
+    <div *ngIf="client && !loading && !error">
+      <!-- Header with actions -->
+      <div class="detail-header">
+        <div class="header-content">
+          <h1 class="client-name">{{ client.name }}</h1>
+          <div class="client-email">{{ client.email }}</div>
+        </div>
+        <div class="header-actions">
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-pencil" 
+            label="Edit" 
+            class="p-button-outlined" 
+            (click)="editClient()">
+          </button>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-file" 
+            label="Create Invoice" 
+            class="p-button-success" 
+            (click)="createInvoice()">
+          </button>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-trash" 
+            label="Delete" 
+            class="p-button-outlined p-button-danger"
+            (click)="confirmDeleteClient()">
+          </button>
+        </div>
+      </div>
+      
+      <!-- Client information cards -->
+      <div class="info-cards-container">
+        <!-- Contact Information -->
+        <p-card header="Contact Information" styleClass="detail-card">
+          <div class="info-group">
+            <div class="info-row" *ngIf="client.phone">
+              <span class="label">Phone:</span>
+              <span class="value">{{ client.phone }}</span>
+            </div>
+            <div class="info-row" *ngIf="client.email">
+              <span class="label">Email:</span>
+              <span class="value">{{ client.email }}</span>
+            </div>
+            <div class="info-row" *ngIf="client.companyName">
+              <span class="label">Company:</span>
+              <span class="value">{{ client.companyName }}</span>
+            </div>
+            <div class="info-row" *ngIf="client.contactPerson">
+              <span class="label">Contact Person:</span>
+              <span class="value">{{ client.contactPerson }}</span>
+            </div>
+            <div class="info-row" *ngIf="client.taxNumber">
+              <span class="label">Tax Number:</span>
+              <span class="value">{{ client.taxNumber }}</span>
+            </div>
+          </div>
+        </p-card>
+        
+        <!-- Address Information -->
+        <p-card header="Address Information" styleClass="detail-card" *ngIf="client.address">
+          <div class="info-group">
+            <div class="info-row" *ngIf="client.address.street">
+              <span class="label">Street:</span>
+              <span class="value">{{ client.address.street }}</span>
+            </div>
+            <div class="info-row" *ngIf="client.address.city || client.address.state">
+              <span class="label">City/State:</span>
+              <span class="value">{{ client.address.city }}{{ client.address.city && client.address.state ? ', ' : '' }}{{ client.address.state }}</span>
+            </div>
+            <div class="info-row" *ngIf="client.address.zipCode">
+              <span class="label">Zip/Postal Code:</span>
+              <span class="value">{{ client.address.zipCode }}</span>
+            </div>
+            <div class="info-row" *ngIf="client.address.country">
+              <span class="label">Country:</span>
+              <span class="value">{{ client.address.country }}</span>
+            </div>
+          </div>
+        </p-card>
+        
+        <!-- Notes -->
+        <p-card header="Notes" styleClass="detail-card" *ngIf="client.notes">
+          <div class="notes-content">
+            {{ client.notes }}
+          </div>
+        </p-card>
+      </div>
+      
+      <!-- Client Invoices -->
+      <div class="client-invoices-section">
+        <h2 class="section-title">
+          <span>Client Invoices</span>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-plus" 
+            label="Create Invoice" 
+            class="p-button-sm p-button-outlined" 
+            (click)="createInvoice()">
+          </button>
+        </h2>
+        
+        <!-- Loading invoices -->
+        <div *ngIf="loadingInvoices" class="p-4 text-center">
+          <i class="pi pi-spin pi-spinner text-xl mb-2"></i>
+          <p>Loading invoices...</p>
+        </div>
+        
+        <!-- Invoice list -->
+        <div *ngIf="!loadingInvoices" class="invoice-list">
+          <!-- Empty state -->
+          <div *ngIf="clientInvoices.length === 0" class="empty-state">
+            <i class="pi pi-file text-4xl mb-3 text-gray-400"></i>
+            <p class="mb-2">No invoices found for this client</p>
+            <button 
+              pButton 
+              type="button" 
+              icon="pi pi-plus" 
+              label="Create First Invoice" 
+              class="p-button-outlined" 
+              (click)="createInvoice()">
+            </button>
+          </div>
+          
+          <!-- Invoice cards -->
+          <div *ngIf="clientInvoices.length > 0" class="invoice-cards">
+            <div *ngFor="let invoice of clientInvoices" class="invoice-card" [routerLink]="['/invoices', invoice.id]">
+              <div class="card-header">
+                <span class="invoice-number">{{ invoice.invoiceNumber }}</span>
+                <p-tag [value]="invoice.status" [severity]="getStatusSeverity(invoice.status)"></p-tag>
+              </div>
+              <div class="card-body">
+                <div class="card-row">
+                  <span class="card-label">Issue Date:</span>
+                  <span class="card-value">{{ invoice.issueDate | date:'mediumDate' }}</span>
+                </div>
+                <div class="card-row">
+                  <span class="card-label">Due Date:</span>
+                  <span class="card-value" [class.overdue]="invoice.status === 'OVERDUE'">{{ invoice.dueDate | date:'mediumDate' }}</span>
+                </div>
+                <div class="card-row">
+                  <span class="card-label">Amount:</span>
+                  <span class="card-value amount">{{ invoice.total | currency }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="detail-footer">
+        <button pButton type="button" icon="pi pi-arrow-left" label="Back to Clients" class="p-button-text" routerLink="/clients"></button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast and Confirmation Dialog -->
+  <p-toast></p-toast>
+  <p-confirmDialog header="Delete Client" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+</app-card> 

@@ -1,0 +1,252 @@
+.client-detail-container {
+  margin-bottom: 2rem;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  
+  .header-content {
+    .client-name {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem 0;
+    }
+    
+    .client-email {
+      color: var(--gray-600);
+      font-size: 1rem;
+    }
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+}
+
+.info-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+:host ::ng-deep {
+  .detail-card {
+    height: 100%;
+    
+    .p-card-header {
+      padding: 1rem 1.25rem 0;
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+    
+    .p-card-content {
+      padding: 1rem 1.25rem 1.5rem;
+    }
+    
+    .p-card-body {
+      border-radius: 0.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+    }
+  }
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: baseline;
+  
+  .label {
+    min-width: 120px;
+    font-weight: 500;
+    color: var(--gray-600);
+  }
+  
+  .value {
+    flex: 1;
+    font-weight: 400;
+  }
+}
+
+.notes-content {
+  white-space: pre-line;
+}
+
+.client-invoices-section {
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+  
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--gray-800);
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  color: var(--gray-500);
+  
+  i {
+    color: var(--gray-400);
+  }
+}
+
+.invoice-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.invoice-card {
+  padding: 1rem;
+  border: 1px solid var(--surface-200);
+  border-radius: 0.5rem;
+  background-color: var(--surface-0);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    background-color: var(--surface-50);
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    
+    .invoice-number {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+  }
+  
+  .card-body {
+    .card-row {
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      
+      .card-label {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+      }
+      
+      .card-value {
+        font-weight: 500;
+        font-size: 0.875rem;
+        
+        &.overdue {
+          color: var(--red-500);
+        }
+        
+        &.amount {
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+.detail-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--surface-200);
+  display: flex;
+  justify-content: flex-start;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .detail-header {
+    flex-direction: column;
+    gap: 1rem;
+    
+    .header-actions {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+}
+
+// Interactive states
+:host ::ng-deep {
+  .p-button {
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+    
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+  
+  .p-tag {
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    padding: 0.25rem 0.625rem;
+  }
+}
+
+// Dark mode support
+:host-context(.dark) {
+  .client-email {
+    color: var(--gray-400);
+  }
+  
+  .info-row .label {
+    color: var(--gray-400);
+  }
+  
+  .section-title {
+    color: var(--gray-300);
+  }
+  
+  .invoice-card {
+    background-color: var(--surface-900);
+    border-color: var(--surface-700);
+    
+    &:hover {
+      background-color: var(--surface-800);
+    }
+    
+    .card-row .card-label {
+      color: var(--gray-400);
+    }
+  }
+  
+  .detail-footer {
+    border-top-color: var(--surface-700);
+  }
+} 

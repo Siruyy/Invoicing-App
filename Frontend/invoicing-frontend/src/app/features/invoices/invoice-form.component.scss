@@ -1,0 +1,209 @@
+.invoice-form-container {
+  margin-bottom: 2rem;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.section-title {
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: var(--gray-700);
+}
+
+.field-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.field {
+  flex: 1;
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+  }
+}
+
+.field-sm {
+  flex: 0.5;
+}
+
+.item-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 1rem 0;
+}
+
+.items-table {
+  width: 100%;
+  
+  th {
+    text-align: left;
+    font-weight: 500;
+    padding: 0.75rem;
+    background-color: var(--surface-100);
+    border-bottom: 1px solid var(--surface-200);
+  }
+  
+  td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--surface-200);
+  }
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .actions-cell {
+    width: 50px;
+    text-align: center;
+  }
+  
+  .description-cell {
+    width: 40%;
+  }
+  
+  .quantity-cell, .price-cell {
+    width: 20%;
+  }
+  
+  .total-cell {
+    width: 20%;
+  }
+}
+
+.totals-container {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--surface-200);
+  padding-top: 1rem;
+}
+
+.total-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  
+  .label {
+    font-weight: 500;
+    width: 150px;
+    text-align: right;
+    margin-right: 1rem;
+  }
+  
+  .value {
+    font-weight: 400;
+    width: 150px;
+    text-align: right;
+  }
+  
+  &.grand-total {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--surface-200);
+    
+    .label, .value {
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+  }
+}
+
+.autosave-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  color: var(--gray-500);
+  font-size: 0.875rem;
+  
+  .pi {
+    margin-right: 0.5rem;
+  }
+  
+  &.saving {
+    color: var(--blue-500);
+  }
+}
+
+// Add interactive hover and click states
+:host ::ng-deep {
+  .p-button {
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+    
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+  
+  .p-button.p-button-text:hover {
+    background-color: var(--surface-100);
+  }
+  
+  .p-inputtext, .p-dropdown, .p-calendar {
+    transition: border-color 0.2s, box-shadow 0.2s;
+    
+    &:hover:not(.p-disabled):not(.p-invalid) {
+      border-color: var(--primary-color);
+    }
+    
+    &:focus:not(.p-disabled):not(.p-invalid) {
+      box-shadow: 0 0 0 1px var(--primary-color-light);
+      border-color: var(--primary-color);
+    }
+  }
+  
+  .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: var(--surface-100);
+    }
+  }
+}
+
+// Dark theme overrides
+:host-context(.dark) {
+  .section-title, .field label {
+    color: var(--gray-300);
+  }
+  
+  .items-table {
+    th {
+      background-color: var(--gray-800);
+      border-bottom: 1px solid var(--gray-700);
+    }
+    
+    td {
+      border-bottom: 1px solid var(--gray-700);
+    }
+  }
+  
+  .totals-container, .total-row.grand-total {
+    border-top: 1px solid var(--gray-700);
+  }
+} 

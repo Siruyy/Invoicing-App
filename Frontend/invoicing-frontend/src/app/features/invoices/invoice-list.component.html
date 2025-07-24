@@ -1,0 +1,60 @@
+<app-card class="strong-shadow" [noPadding]="false">
+  <div class="list-wrapper">
+    <div class="header-row">
+      <h1 class="title">Invoices</h1>
+      <button pButton type="button" label="Create Invoice" routerLink="/invoices/new" class="green-btn"></button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <div class="filter-field">
+        <label>Status</label>
+        <p-dropdown [options]="statusOptions" [(ngModel)]="statusFilter" placeholder="Any"></p-dropdown>
+      </div>
+      <div class="filter-field narrow">
+        <label>Start date</label>
+        <p-calendar [(ngModel)]="startDateFilter" dateFormat="mm/dd/yy" [showIcon]="true"></p-calendar>
+      </div>
+      <div class="filter-field narrow">
+        <label>End date</label>
+        <p-calendar [(ngModel)]="endDateFilter" dateFormat="mm/dd/yy" [showIcon]="true"></p-calendar>
+      </div>
+      <span class="spacer"></span>
+      <div class="search-wrap">
+        <i class="pi pi-search search-icon"></i>
+        <input pInputText type="text" placeholder="Search…" [(ngModel)]="globalSearch" />
+      </div>
+    </div>
+
+    <!-- Table -->
+    <p-table [value]="invoices" [paginator]="true" [rows]="10" class="invoice-table" [rowHover]="false">
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="invoiceNumber">Invoice #<p-sortIcon field="invoiceNumber"></p-sortIcon></th>
+          <th pSortableColumn="client.name">Client<p-sortIcon field="client.name"></p-sortIcon></th>
+          <th pSortableColumn="issueDate">Issue Date<p-sortIcon field="issueDate"></p-sortIcon></th>
+          <th pSortableColumn="dueDate">Due Date<p-sortIcon field="dueDate"></p-sortIcon></th>
+          <th>Status</th>
+          <th pSortableColumn="total" class="text-right">Amount<p-sortIcon field="total"></p-sortIcon></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row>
+        <tr (click)="goTo(row)" class="row-click cursor-pointer">
+          <td>{{ row.invoiceNumber }}</td>
+          <td>{{ row.client.name }}</td>
+          <td>{{ row.issueDate | date:'MMM d, y' }}</td>
+          <td>{{ row.dueDate | date:'MMM d, y' }}</td>
+          <td><p-tag [value]="row.status" [severity]="getStatusSeverity(row.status)"></p-tag></td>
+          <td class="text-right">{{ row.total | currency }}</td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="text-center p-5">No invoices found</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</app-card> 

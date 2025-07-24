@@ -126,3 +126,4 @@ C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Api
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Api\obj\Debug\net9.0\InvoicingApp.Api.pdb
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Api\obj\Debug\net9.0\InvoicingApp.Api.genruntimeconfig.cache
 C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Api\obj\Debug\net9.0\ref\InvoicingApp.Api.dll
+C:\Users\nulys\Documents\Prog\Invoicing Application\Backend\src\InvoicingApp.Api\obj\Debug\net9.0\InvoicingApp.Api.sourcelink.json

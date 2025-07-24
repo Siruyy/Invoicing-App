@@ -6,14 +6,40 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
-  // Placeholder routes - will be implemented later
-  { path: 'clients', redirectTo: '/dashboard' },
-  { path: 'clients/new', redirectTo: '/dashboard' },
-  { path: 'clients/:id', redirectTo: '/dashboard' },
-  { path: 'clients/:id/edit', redirectTo: '/dashboard' },
-  { path: 'invoices', redirectTo: '/dashboard' },
-  { path: 'invoices/new', redirectTo: '/dashboard' },
-  { path: 'invoices/:id', redirectTo: '/dashboard' },
-  { path: 'invoices/:id/edit', redirectTo: '/dashboard' },
+  // Invoice Management routes
+  {
+    path: 'invoices',
+    loadComponent: () => import('./features/invoices/invoice-list.component').then(m => m.InvoiceListComponent)
+  },
+  {
+    path: 'invoices/new',
+    loadComponent: () => import('./features/invoices/invoice-form.component').then(m => m.InvoiceFormComponent)
+  },
+  {
+    path: 'invoices/:id/edit',
+    loadComponent: () => import('./features/invoices/invoice-form.component').then(m => m.InvoiceFormComponent)
+  },
+  {
+    path: 'invoices/:id',
+    loadComponent: () => import('./features/invoices/invoice-detail.component').then(m => m.InvoiceDetailComponent)
+  },
+  // Client Management routes
+  {
+    path: 'clients',
+    loadComponent: () => import('./features/clients/client-list.component').then(m => m.ClientListComponent)
+  },
+  {
+    path: 'clients/new',
+    loadComponent: () => import('./features/clients/client-form.component').then(m => m.ClientFormComponent)
+  },
+  {
+    path: 'clients/:id/edit',
+    loadComponent: () => import('./features/clients/client-form.component').then(m => m.ClientFormComponent)
+  },
+  {
+    path: 'clients/:id',
+    loadComponent: () => import('./features/clients/client-detail.component').then(m => m.ClientDetailComponent)
+  },
+  // Wildcard fallback
   { path: '**', redirectTo: '/dashboard' }
 ];

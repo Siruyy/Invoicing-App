@@ -1,0 +1,239 @@
+<app-card [noPadding]="false" class="strong-shadow">
+  <div class="client-form-container">
+    <!-- Loading state -->
+    <div *ngIf="loading" class="p-4 text-center">
+      <i class="pi pi-spin pi-spinner text-4xl mb-3"></i>
+      <p>Loading client data...</p>
+    </div>
+    
+    <!-- Form content -->
+    <div *ngIf="!loading" [formGroup]="clientForm">
+      <!-- Form header -->
+      <div class="form-header">
+        <h1 class="form-title">{{ isEditMode ? 'Edit Client' : 'New Client' }}</h1>
+        <div class="form-actions">
+          <button 
+            pButton 
+            pRipple 
+            type="button" 
+            label="Cancel" 
+            icon="pi pi-times" 
+            class="p-button-outlined p-button-secondary" 
+            [disabled]="saving"
+            (click)="confirmCancel()">
+          </button>
+          <button 
+            pButton 
+            pRipple 
+            type="button" 
+            label="Save" 
+            icon="pi pi-check" 
+            class="p-button-success" 
+            [loading]="saving"
+            (click)="saveClient()">
+          </button>
+        </div>
+      </div>
+      
+      <!-- Basic Information -->
+      <div class="section">
+        <h2 class="section-title">Basic Information</h2>
+        
+        <div class="field-row">
+          <div class="field">
+            <label for="name">Client Name *</label>
+            <input 
+              id="name" 
+              type="text" 
+              pInputText 
+              formControlName="name" 
+              [ngClass]="{'ng-invalid ng-dirty': clientForm.get('name')?.invalid && clientForm.get('name')?.touched}" 
+              class="w-full"
+            />
+            <small 
+              *ngIf="clientForm.get('name')?.invalid && clientForm.get('name')?.touched" 
+              class="p-error"
+            >
+              Name is required
+            </small>
+          </div>
+          
+          <div class="field">
+            <label for="email">Email Address *</label>
+            <input 
+              id="email" 
+              type="email" 
+              pInputText 
+              formControlName="email" 
+              [ngClass]="{'ng-invalid ng-dirty': clientForm.get('email')?.invalid && clientForm.get('email')?.touched}" 
+              class="w-full"
+            />
+            <small 
+              *ngIf="clientForm.get('email')?.invalid && clientForm.get('email')?.touched" 
+              class="p-error"
+            >
+              Valid email is required
+            </small>
+          </div>
+        </div>
+        
+        <div class="field-row">
+          <div class="field">
+            <label for="phone">Phone Number</label>
+            <input 
+              id="phone" 
+              type="text" 
+              pInputText 
+              formControlName="phone" 
+              class="w-full"
+            />
+          </div>
+          
+          <div class="field">
+            <label for="companyName">Company Name</label>
+            <input 
+              id="companyName" 
+              type="text" 
+              pInputText 
+              formControlName="companyName" 
+              class="w-full"
+            />
+          </div>
+        </div>
+        
+        <div class="field-row">
+          <div class="field">
+            <label for="contactPerson">Contact Person</label>
+            <input 
+              id="contactPerson" 
+              type="text" 
+              pInputText 
+              formControlName="contactPerson" 
+              class="w-full"
+            />
+          </div>
+          
+          <div class="field">
+            <label for="taxNumber">Tax Number</label>
+            <input 
+              id="taxNumber" 
+              type="text" 
+              pInputText 
+              formControlName="taxNumber" 
+              class="w-full"
+            />
+          </div>
+        </div>
+      </div>
+      
+      <!-- Address Section -->
+      <div class="section" formGroupName="address">
+        <h2 class="section-title">Address Information</h2>
+        
+        <div class="field">
+          <label for="street">Street Address</label>
+          <input 
+            id="street" 
+            type="text" 
+            pInputText 
+            formControlName="street" 
+            class="w-full"
+          />
+        </div>
+        
+        <div class="field-row">
+          <div class="field">
+            <label for="city">City</label>
+            <input 
+              id="city" 
+              type="text" 
+              pInputText 
+              formControlName="city" 
+              class="w-full"
+            />
+          </div>
+          
+          <div class="field">
+            <label for="state">State/Province</label>
+            <input 
+              id="state" 
+              type="text" 
+              pInputText 
+              formControlName="state" 
+              class="w-full"
+            />
+          </div>
+        </div>
+        
+        <div class="field-row">
+          <div class="field">
+            <label for="zipCode">Zip/Postal Code</label>
+            <input 
+              id="zipCode" 
+              type="text" 
+              pInputText 
+              formControlName="zipCode" 
+              class="w-full"
+            />
+          </div>
+          
+          <div class="field">
+            <label for="country">Country</label>
+            <input 
+              id="country" 
+              type="text" 
+              pInputText 
+              formControlName="country" 
+              class="w-full"
+            />
+          </div>
+        </div>
+      </div>
+      
+      <!-- Notes Section -->
+      <div class="section">
+        <h2 class="section-title">Additional Notes</h2>
+        
+        <div class="field">
+          <textarea 
+            pInputTextarea 
+            formControlName="notes" 
+            rows="4" 
+            placeholder="Add any additional information about the client here..."
+            class="w-full"
+          ></textarea>
+        </div>
+      </div>
+      
+      <!-- Form actions -->
+      <div class="form-footer">
+        <div class="form-actions">
+          <button 
+            pButton 
+            pRipple 
+            type="button" 
+            label="Cancel" 
+            icon="pi pi-times" 
+            class="p-button-outlined p-button-secondary" 
+            [disabled]="saving"
+            (click)="confirmCancel()">
+          </button>
+          <button 
+            pButton 
+            pRipple 
+            type="button" 
+            label="Save" 
+            icon="pi pi-check" 
+            class="p-button-success" 
+            [loading]="saving"
+            (click)="saveClient()">
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast and Confirmation Dialog -->
+  <p-toast></p-toast>
+  <p-confirmDialog header="Unsaved Changes" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+</app-card> 
