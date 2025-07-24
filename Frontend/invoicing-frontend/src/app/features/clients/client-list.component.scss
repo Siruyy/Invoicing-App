@@ -70,10 +70,20 @@
 
 .client-row {
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+  padding: 1rem 0.5rem; /* Increased padding for better spacing */
+  border-bottom: 1px solid var(--surface-d);
   
   &:hover {
-    background-color: var(--surface-100);
+    background-color: var(--highlight-bg);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    background-color: var(--surface-200);
+    transform: scale(0.995);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -116,6 +126,46 @@
   }
 }
 
+/* Custom table styling */
+:host ::ng-deep .custom-table {
+  .p-datatable-wrapper {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .p-datatable-header {
+    background-color: var(--surface-b);
+    border-bottom: 1px solid var(--surface-d);
+  }
+  
+  .p-datatable-thead > tr > th {
+    background-color: var(--surface-b);
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--surface-d);
+    font-weight: 600;
+  }
+  
+  .p-datatable-tbody > tr {
+    border-bottom: 1px solid var(--surface-d);
+    
+    &:nth-child(even) {
+      background-color: var(--surface-b);
+    }
+  }
+  
+  .p-datatable-tbody > tr > td {
+    padding: 1.25rem 1rem;
+    vertical-align: middle;
+  }
+  
+  .p-paginator {
+    background-color: var(--surface-b);
+    border-top: 1px solid var(--surface-d);
+    padding: 0.75rem 1rem;
+  }
+}
+
 // Dark mode support
 :host-context(.dark) {
   .green-btn {
@@ -130,8 +180,17 @@
     }
   }
   
-  .client-row:hover {
-    background-color: var(--surface-700);
+  .client-row {
+    border-bottom: 1px solid var(--surface-600);
+    
+    &:hover {
+      background-color: var(--surface-700);
+    }
+    
+    &:active {
+      background-color: var(--surface-800);
+      transform: scale(0.995);
+    }
   }
   
   .action-buttons button:hover {
