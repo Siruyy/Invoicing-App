@@ -38,13 +38,20 @@ export class ApiService {
   }
 
   private handleError(error: any) {
-    // Log errors to a service or send to a logging server
+    // Log detailed error information to console for debugging
     console.error('API error', error);
+    
+    // Extract validation errors if available
+    const validationErrors = error.error?.errors ? Object.values(error.error.errors).flat() : [];
+    const errorMessage = validationErrors.length > 0 
+      ? validationErrors.join(', ') 
+      : error.error?.message || error.error?.title || 'Server error';
     
     return throwError(() => {
       const error$ = {
         status: error.status || 500,
-        message: error.error?.message || 'Server error'
+        message: errorMessage,
+        validationErrors: error.error?.errors || {}
       };
       return error$;
     });
