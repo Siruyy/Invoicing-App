@@ -9,25 +9,36 @@
     <div class="filter-bar">
       <div class="filter-field">
         <label>Status</label>
-        <p-dropdown [options]="statusOptions" [(ngModel)]="statusFilter" placeholder="Any"></p-dropdown>
+        <p-dropdown [options]="statusOptions" [(ngModel)]="statusFilter" placeholder="Any" (onChange)="onStatusChange()"></p-dropdown>
       </div>
       <div class="filter-field narrow">
         <label>Start date</label>
-        <p-calendar [(ngModel)]="startDateFilter" dateFormat="mm/dd/yy" [showIcon]="true"></p-calendar>
+        <p-calendar [(ngModel)]="startDateFilter" dateFormat="mm/dd/yy" [showIcon]="true" (onSelect)="onDateFilterChange()"></p-calendar>
       </div>
       <div class="filter-field narrow">
         <label>End date</label>
-        <p-calendar [(ngModel)]="endDateFilter" dateFormat="mm/dd/yy" [showIcon]="true"></p-calendar>
+        <p-calendar [(ngModel)]="endDateFilter" dateFormat="mm/dd/yy" [showIcon]="true" (onSelect)="onDateFilterChange()"></p-calendar>
       </div>
       <span class="spacer"></span>
       <div class="search-wrap">
         <i class="pi pi-search search-icon"></i>
-        <input pInputText type="text" placeholder="Search…" [(ngModel)]="globalSearch" />
+        <input pInputText type="text" placeholder="Search…" [(ngModel)]="globalSearch" (keyup.enter)="onSearchChange()" />
       </div>
     </div>
 
     <!-- Table -->
-    <p-table [value]="invoices" [paginator]="true" [rows]="10" class="invoice-table" [rowHover]="true" styleClass="p-datatable-sm custom-table"
+    <p-table 
+      [value]="invoices" 
+      [paginator]="true" 
+      [rows]="rowsPerPage"
+      [totalRecords]="totalRecords"
+      [rowsPerPageOptions]="[5, 10, 25, 50]"
+      [lazy]="true"
+      (onPage)="onPageChange($event)"
+      class="invoice-table" 
+      [rowHover]="true" 
+      styleClass="p-datatable-sm custom-table"
+      [loading]="loading">
       <ng-template pTemplate="header">
         <tr>
           <th pSortableColumn="invoiceNumber">Invoice #<p-sortIcon field="invoiceNumber"></p-sortIcon></th>
