@@ -7,15 +7,16 @@
     
     <!-- Search bar -->
     <div class="search-container">
-      <span class="p-input-icon-left search-field">
-        <i class="pi pi-search"></i>
+      <div class="search-field-wrapper">
+        <i class="pi pi-search search-icon-outside"></i>
         <input 
           type="text" 
           pInputText 
+          class="search-input" 
           placeholder="Search clients..." 
           [(ngModel)]="globalFilter" 
         />
-      </span>
+      </div>
     </div>
     
     <!-- Loading state -->
