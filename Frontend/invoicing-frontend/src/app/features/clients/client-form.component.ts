@@ -15,6 +15,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { DividerModule } from 'primeng/divider';
 import { RippleModule } from 'primeng/ripple';
+import { DropdownModule } from 'primeng/dropdown';
 
 // Components
 import { CardComponent } from '../../shared/components/card/card.component';
@@ -38,6 +39,7 @@ import { Client } from '../../core/models/client.model';
     ConfirmDialogModule,
     DividerModule,
     RippleModule,
+    DropdownModule,
     CardComponent
   ],
   providers: [
@@ -53,6 +55,7 @@ export class ClientFormComponent implements OnInit, OnDestroy {
   clientId?: number;
   loading = true;
   saving = false;
+  countries: { name: string; code: string }[] = [];
   
   private destroy$ = new Subject<void>();
 
@@ -87,9 +90,38 @@ export class ClientFormComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+  
+  // Load countries list for dropdown
+  private loadCountries(): void {
+    this.countries = [
+      { name: 'United States', code: 'US' },
+      { name: 'Canada', code: 'CA' },
+      { name: 'United Kingdom', code: 'GB' },
+      { name: 'Australia', code: 'AU' },
+      { name: 'Germany', code: 'DE' },
+      { name: 'France', code: 'FR' },
+      { name: 'Spain', code: 'ES' },
+      { name: 'Italy', code: 'IT' },
+      { name: 'Japan', code: 'JP' },
+      { name: 'China', code: 'CN' },
+      { name: 'India', code: 'IN' },
+      { name: 'Brazil', code: 'BR' },
+      { name: 'Mexico', code: 'MX' },
+      { name: 'South Africa', code: 'ZA' },
+      { name: 'Nigeria', code: 'NG' },
+      { name: 'Egypt', code: 'EG' },
+      { name: 'Singapore', code: 'SG' },
+      { name: 'New Zealand', code: 'NZ' },
+      { name: 'Netherlands', code: 'NL' },
+      { name: 'Sweden', code: 'SE' },
+      { name: 'Switzerland', code: 'CH' }
+    ];
+  }
 
   // Initialize the form
   private initForm(): void {
+    this.loadCountries();
+    
     this.clientForm = this.fb.group({
       name: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
@@ -130,7 +162,28 @@ export class ClientFormComponent implements OnInit, OnDestroy {
   }
 
   // Populate form with client data
-  private populateForm(client: Client): void {
+  private populateForm(client: any): void {
+    // Handle both frontend model and backend DTO formats
+    const address = client.address || {};
+    let street = '', city = '', state = '', zipCode = '', country = '';
+    
+    // Check if address is a string (backend format) or an object (frontend format)
+    if (typeof client.address === 'string') {
+      // Backend format with separate fields
+      street = client.address || '';
+      city = client.city || '';
+      state = client.state || '';
+      zipCode = client.zipCode || '';
+      country = client.country || '';
+    } else if (client.address) {
+      // Frontend format with nested address object
+      street = client.address.street || '';
+      city = client.address.city || '';
+      state = client.address.state || '';
+      zipCode = client.address.zipCode || '';
+      country = client.address.country || '';
+    }
+    
     this.clientForm.patchValue({
       name: client.name,
       email: client.email,
@@ -139,11 +192,11 @@ export class ClientFormComponent implements OnInit, OnDestroy {
       contactPerson: client.contactPerson || '',
       taxNumber: client.taxNumber || '',
       address: {
-        street: client.address?.street || '',
-        city: client.address?.city || '',
-        state: client.address?.state || '',
-        zipCode: client.address?.zipCode || '',
-        country: client.address?.country || ''
+        street: street,
+        city: city,
+        state: state,
+        zipCode: zipCode,
+        country: country
       },
       notes: client.notes || ''
     });
@@ -195,19 +248,25 @@ export class ClientFormComponent implements OnInit, OnDestroy {
   }
 
   // Prepare the form data for submission
-  private prepareFormData(): Client {
+  private prepareFormData(): any {
     const formValue = this.clientForm.value;
+    const addressObj = formValue.address || {};
     
+    // Transform the data to match the backend DTO structure
     return {
       id: this.clientId,
       name: formValue.name,
       email: formValue.email,
-      phone: formValue.phone,
-      companyName: formValue.companyName,
-      contactPerson: formValue.contactPerson,
-      taxNumber: formValue.taxNumber,
-      address: formValue.address,
-      notes: formValue.notes
+      phone: formValue.phone || '',
+      companyName: formValue.companyName || '',
+      contactPerson: formValue.contactPerson || '',
+      taxNumber: formValue.taxNumber || '',
+      address: addressObj.street || '',
+      city: addressObj.city || '',
+      state: addressObj.state || '',
+      zipCode: addressObj.zipCode || '',
+      country: addressObj.country || '',
+      notes: formValue.notes || ''
     };
   }
 
