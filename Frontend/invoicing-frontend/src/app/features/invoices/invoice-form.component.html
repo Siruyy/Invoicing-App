@@ -261,8 +261,8 @@
         </div>
       </div>
       
-      <!-- Form actions & autosave indicator -->
-      <div class="flex justify-between items-center mt-6">
+      <!-- Autosave indicator -->
+      <div class="mt-6">
         <div class="autosave-indicator" [class.saving]="autoSaving">
           <i *ngIf="autoSaving" class="pi pi-spin pi-spinner"></i>
           <i *ngIf="lastSaved && !autoSaving" class="pi pi-check"></i>
@@ -270,36 +270,6 @@
           <span *ngIf="lastSaved && !autoSaving">
             Last saved: {{ lastSaved | date:'medium' }}
           </span>
-        </div>
-        
-        <div class="form-actions">
-          <button 
-            pButton 
-            type="button" 
-            label="Cancel" 
-            icon="pi pi-times" 
-            class="p-button-outlined p-button-secondary" 
-            [disabled]="saving"
-            routerLink="/invoices">
-          </button>
-          <button 
-            pButton 
-            type="button" 
-            label="Save as Draft" 
-            icon="pi pi-save" 
-            class="p-button-outlined" 
-            [loading]="saving"
-            (click)="saveAsDraft()">
-          </button>
-          <button 
-            pButton 
-            type="button" 
-            label="Save & Send" 
-            icon="pi pi-send" 
-            class="p-button" 
-            [loading]="saving"
-            (click)="saveAndSend()">
-          </button>
         </div>
       </div>
     </div>

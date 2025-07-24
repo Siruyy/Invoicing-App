@@ -7,16 +7,48 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
-}
-
-.form-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0; /* slate-200 */
+  
+  .form-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1e293b; /* slate-800 */
+  }
 }
 
 .form-actions {
   display: flex;
   gap: 0.75rem;
+  
+  button {
+    min-width: 100px; /* Ensure consistent button width */
+    padding: 0.5rem 1rem; /* Add comfortable padding */
+    
+    &.p-button-secondary {
+      font-weight: 500;
+    }
+    
+    &.p-button-success, &.p-button {
+      font-weight: 500;
+    }
+    
+    .p-button-icon {
+      margin-right: 0.375rem; /* Ensure consistent icon spacing */
+    }
+  }
+}
+
+/* Dark mode styles */
+:host-context(.dark) {
+  .form-header {
+    border-bottom-color: #334155; /* slate-700 */
+    
+    .form-title {
+      color: #f1f5f9; /* slate-100 */
+    }
+  }
 }
 
 .section-title {

@@ -35,9 +35,13 @@
         </div>
       </div>
       
-      <!-- Basic Information -->
-      <div class="section">
-        <h2 class="section-title">Basic Information</h2>
+      <!-- Two Column Layout -->
+      <div class="two-column-layout">
+        <!-- Left Column -->
+        <div class="column left-column">
+          <!-- Basic Information -->
+          <div class="section">
+            <h2 class="section-title">Basic Information</h2>
         
         <div class="field-row">
           <div class="field">
@@ -179,55 +183,38 @@
           
           <div class="field">
             <label for="country">Country</label>
-            <input 
-              id="country" 
-              type="text" 
-              pInputText 
+            <p-dropdown 
+              id="country"
               formControlName="country" 
-              class="w-full"
-            />
+              [options]="countries" 
+              optionLabel="name"
+              optionValue="code"
+              placeholder="Select a country" 
+              [filter]="true"
+              filterBy="name"
+              class="w-full country-dropdown"
+            ></p-dropdown>
           </div>
         </div>
       </div>
-      
-      <!-- Notes Section -->
-      <div class="section">
-        <h2 class="section-title">Additional Notes</h2>
-        
-        <div class="field">
-          <textarea 
-            pInputTextarea 
-            formControlName="notes" 
-            rows="4" 
-            placeholder="Add any additional information about the client here..."
-            class="w-full"
-          ></textarea>
         </div>
-      </div>
-      
-      <!-- Form actions -->
-      <div class="form-footer">
-        <div class="form-actions">
-          <button 
-            pButton 
-            pRipple 
-            type="button" 
-            label="Cancel" 
-            icon="pi pi-times" 
-            class="p-button-outlined p-button-secondary" 
-            [disabled]="saving"
-            (click)="confirmCancel()">
-          </button>
-          <button 
-            pButton 
-            pRipple 
-            type="button" 
-            label="Save" 
-            icon="pi pi-check" 
-            class="p-button-success" 
-            [loading]="saving"
-            (click)="saveClient()">
-          </button>
+        
+        <!-- Right Column -->
+        <div class="column right-column">
+          <!-- Notes Section -->
+          <div class="section">
+            <h2 class="section-title">Additional Notes</h2>
+            
+            <div class="field">
+              <textarea 
+                pInputTextarea 
+                formControlName="notes" 
+                rows="19"
+                placeholder="Add any additional information about the client here..."
+                class="w-full notes-textarea"
+              ></textarea>
+            </div>
+          </div>
         </div>
       </div>
     </div>
