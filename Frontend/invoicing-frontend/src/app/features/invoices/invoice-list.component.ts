@@ -13,6 +13,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { CardComponent } from '../../shared/components/card/card.component';
 
 import { Invoice, InvoiceStatus } from '../../core/models/invoice.model';
+import { InvoiceService } from '../../core/services/invoice.service';
 
 @Component({
   selector: 'app-invoice-list',
@@ -52,16 +53,65 @@ export class InvoiceListComponent implements OnInit {
     { label: 'Overdue', value: InvoiceStatus.OVERDUE }
   ];
 
-  constructor(private router: Router) {}
+  totalRecords = 0;
+  currentPage = 1;
+  rowsPerPage = 10;
+
+  constructor(
+    private router: Router,
+    private invoiceService: InvoiceService
+  ) {}
 
   ngOnInit(): void {
-    // mock data for now
-    this.invoices = this.generateMockInvoices();
-    this.loading = false;
+    this.loadInvoices();
+  }
+  
+  loadInvoices(): void {
+    this.loading = true;
+    this.invoiceService.getInvoices(
+      this.currentPage,
+      this.rowsPerPage,
+      this.statusFilter || undefined,
+      undefined,
+      this.globalSearch || undefined
+    ).subscribe({
+      next: (response) => {
+        this.invoices = response.items;
+        this.totalRecords = response.total;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Failed to load invoices:', error);
+        this.loading = false;
+        this.invoices = [];
+      }
+    });
   }
 
   goTo(inv: Invoice) {
     this.router.navigate(['/invoices', inv.id]);
+  }
+
+  // Filter and pagination handlers
+  onStatusChange(): void {
+    this.currentPage = 1; // Reset to first page when filter changes
+    this.loadInvoices();
+  }
+  
+  onDateFilterChange(): void {
+    this.currentPage = 1;
+    this.loadInvoices();
+  }
+  
+  onSearchChange(): void {
+    this.currentPage = 1;
+    this.loadInvoices();
+  }
+  
+  onPageChange(event: any): void {
+    this.currentPage = event.page + 1; // PrimeNG uses 0-based indexing
+    this.rowsPerPage = event.rows;
+    this.loadInvoices();
   }
 
   // --- helpers -------------------------------------------------------------
@@ -78,37 +128,5 @@ export class InvoiceListComponent implements OnInit {
       default:
         return 'info';
     }
-  }
-
-  private generateMockInvoices(): Invoice[] {
-    const list: Invoice[] = [];
-    const statuses = [
-      InvoiceStatus.DRAFT,
-      InvoiceStatus.PENDING,
-      InvoiceStatus.PAID,
-      InvoiceStatus.OVERDUE
-    ];
-
-    for (let i = 1; i <= 25; i++) {
-      const issue = new Date();
-      issue.setDate(issue.getDate() - i);
-      const due = new Date(issue);
-      due.setDate(issue.getDate() + 30);
-
-      list.push({
-        id: i,
-        invoiceNumber: `INV-${String(i).padStart(5, '0')}`,
-        client: {
-          id: i,
-          name: `Client ${i}`
-        } as any,
-        issueDate: issue,
-        dueDate: due,
-        status: statuses[i % statuses.length],
-        items: [],
-        total: 250 * i
-      } as Invoice);
-    }
-    return list;
   }
 } 
