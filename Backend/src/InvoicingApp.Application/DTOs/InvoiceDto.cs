@@ -16,6 +16,9 @@ namespace InvoicingApp.Application.DTOs
         public decimal TotalAmount { get; set; }
         public string Notes { get; set; } = string.Empty;
         public InvoiceStatus Status { get; set; }
+        public DateTime? PaidAt { get; set; }
+        public string Currency { get; set; } = "USD";
+        public decimal ExchangeRate { get; set; } = 1;
         public List<InvoiceItemDto> Items { get; set; } = new List<InvoiceItemDto>();
     }
 
@@ -45,5 +48,6 @@ namespace InvoicingApp.Application.DTOs
     {
         public int Id { get; set; }
         public InvoiceStatus Status { get; set; }
+        public DateTime? PaidAt { get; set; }
     }
 } 

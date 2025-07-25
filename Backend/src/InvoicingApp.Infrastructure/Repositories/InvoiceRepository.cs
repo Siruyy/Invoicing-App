@@ -28,12 +28,32 @@ namespace InvoicingApp.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Invoice>> GetInvoicesByStatusAsync(InvoiceStatus status)
+        public async Task<IEnumerable<Invoice>> GetInvoicesByStatusAsync(InvoiceStatus status, bool exclude = false)
+        {
+            var query = _context.Invoices
+                .Include(i => i.Client)
+                .Include(i => i.Items);
+                
+            // If exclude is true, we want to get all invoices EXCEPT those with the specified status
+            if (exclude)
+            {
+                return await query
+                    .Where(i => i.Status != status)
+                    .ToListAsync();
+            }
+            else
+            {
+                return await query
+                    .Where(i => i.Status == status)
+                    .ToListAsync();
+            }
+        }
+        
+        public async Task<IEnumerable<Invoice>> GetAllInvoicesWithClientsAsync()
         {
             return await _context.Invoices
                 .Include(i => i.Client)
                 .Include(i => i.Items)
-                .Where(i => i.Status == status)
                 .ToListAsync();
         }
 

@@ -2,6 +2,8 @@ using InvoicingApp.Application.DTOs;
 using InvoicingApp.Application.Interfaces;
 using InvoicingApp.Core.Enums;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace InvoicingApp.Api.Controllers
 {
@@ -10,17 +12,42 @@ namespace InvoicingApp.Api.Controllers
     public class InvoicesController : ControllerBase
     {
         private readonly IInvoiceService _invoiceService;
+        private readonly IEmailService? _emailService;
 
-        public InvoicesController(IInvoiceService invoiceService)
+        public InvoicesController(IInvoiceService invoiceService, IEmailService? emailService = null)
         {
             _invoiceService = invoiceService;
+            _emailService = emailService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetInvoices()
+        public async Task<ActionResult<IEnumerable<InvoiceDto>>> GetInvoices(
+            [FromQuery] int page = 1, 
+            [FromQuery] int limit = 10,
+            [FromQuery] InvoiceStatus? status = null,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null,
+            [FromQuery] string search = null,
+            [FromQuery] bool includeDrafts = false)
         {
-            var invoices = await _invoiceService.GetAllInvoicesAsync();
-            return Ok(invoices);
+            // Get filtered invoices with pagination
+            var result = await _invoiceService.GetFilteredInvoicesAsync(
+                page, 
+                limit, 
+                status, 
+                startDate, 
+                endDate, 
+                search, 
+                includeDrafts);
+            
+            // Log information about the invoices for debugging
+            foreach (var invoice in result.Items)
+            {
+                Console.WriteLine($"Invoice ID: {invoice.Id}, Number: {invoice.InvoiceNumber}, Status: {invoice.Status}");
+            }
+            
+            // Return the properly structured response with pagination info
+            return Ok(new { items = result.Items, total = result.TotalCount });
         }
 
         [HttpGet("{id}")]
@@ -98,7 +125,7 @@ namespace InvoicingApp.Api.Controllers
         }
 
         [HttpPut("{id}/status")]
-        public async Task<IActionResult> UpdateInvoiceStatus(int id, UpdateInvoiceStatusDto statusDto)
+        public async Task<ActionResult<InvoiceDto>> UpdateInvoiceStatus(int id, UpdateInvoiceStatusDto statusDto)
         {
             if (id != statusDto.Id)
             {
@@ -108,6 +135,9 @@ namespace InvoicingApp.Api.Controllers
             try
             {
                 await _invoiceService.UpdateInvoiceStatusAsync(statusDto);
+                // Return the updated invoice with full data
+                var updatedInvoice = await _invoiceService.GetInvoiceByIdAsync(id);
+                return Ok(updatedInvoice);
             }
             catch (KeyNotFoundException ex)
             {
@@ -117,8 +147,58 @@ namespace InvoicingApp.Api.Controllers
             {
                 return BadRequest(ex.Message);
             }
-
-            return NoContent();
+        }
+        
+        [HttpPatch("{id}/status")]
+        public async Task<ActionResult<InvoiceDto>> PatchInvoiceStatus(int id, [FromBody] UpdateInvoiceStatusDto statusDto)
+        {
+            try
+            {
+                // Make sure the ID in the DTO matches the route ID
+                statusDto.Id = id;
+                
+                await _invoiceService.UpdateInvoiceStatusAsync(statusDto);
+                
+                // Return the updated invoice with full data
+                var updatedInvoice = await _invoiceService.GetInvoiceByIdAsync(id);
+                return Ok(updatedInvoice);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+        [HttpPatch("{id}/mark-as-paid")]
+        public async Task<ActionResult<InvoiceDto>> MarkAsPaid(int id)
+        {
+            try
+            {
+                var statusDto = new UpdateInvoiceStatusDto
+                {
+                    Id = id,
+                    Status = InvoiceStatus.Paid,
+                    PaidAt = DateTime.UtcNow
+                };
+                
+                await _invoiceService.UpdateInvoiceStatusAsync(statusDto);
+                
+                // Return the updated invoice with full data
+                var updatedInvoice = await _invoiceService.GetInvoiceByIdAsync(id);
+                return Ok(updatedInvoice);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
@@ -144,7 +224,7 @@ namespace InvoicingApp.Api.Controllers
         public async Task<ActionResult<string>> GenerateInvoiceNumber()
         {
             var invoiceNumber = await _invoiceService.GenerateInvoiceNumberAsync();
-            return Ok(invoiceNumber);
+            return Ok(new { invoiceNumber });
         }
 
         [HttpPost("drafts")]
@@ -177,6 +257,94 @@ namespace InvoicingApp.Api.Controllers
             }
 
             return Ok(draft);
+        }
+
+        [HttpGet("{id}/pdf")]
+        public async Task<IActionResult> GetInvoicePdf(int id)
+        {
+            try
+            {
+                var pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(id);
+                var invoice = await _invoiceService.GetInvoiceByIdAsync(id);
+
+                if (invoice == null)
+                {
+                    return NotFound();
+                }
+
+                string fileName = $"Invoice-{invoice.InvoiceNumber}.pdf";
+                
+                return File(pdfBytes, "application/pdf", fileName);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("{id}/send")]
+        public async Task<IActionResult> SendInvoiceEmail(int id, [FromBody] Models.SendInvoiceEmailRequest request)
+        {
+            if (string.IsNullOrEmpty(request.RecipientEmail))
+            {
+                return BadRequest("Email address is required");
+            }
+
+            var invoice = await _invoiceService.GetInvoiceByIdAsync(id);
+            
+            if (invoice == null)
+            {
+                return NotFound("Invoice not found");
+            }
+
+            try
+            {
+                // Ensure we have an email service
+                var emailService = _emailService ?? HttpContext.RequestServices.GetService<IEmailService>();
+
+                if (emailService == null)
+                {
+                    // If we still don't have an email service, return an error
+                    return StatusCode(500, "Email service is not configured");
+                }
+
+                // For debugging
+                Console.WriteLine($"Sending invoice {id} to {request.RecipientEmail}");
+                
+                // Send the email
+                var success = await emailService.SendInvoiceEmailAsync(id, request.RecipientEmail);
+
+                if (success)
+                {
+                // Update invoice status only if it's a draft
+                // We don't modify the status of Pending, Paid, or Cancelled invoices
+                if (invoice.Status == Core.Enums.InvoiceStatus.Draft)
+                {
+                    var updateStatusDto = new UpdateInvoiceStatusDto
+                    {
+                        Id = id,
+                        Status = Core.Enums.InvoiceStatus.Pending
+                    };
+                    
+                    await _invoiceService.UpdateInvoiceStatusAsync(updateStatusDto);
+                }                    return Ok(new { message = "Email sent successfully" });
+                }
+                else
+                {
+                    return StatusCode(500, "Failed to send email");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending email: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
     }
 } 

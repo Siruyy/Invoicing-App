@@ -11,16 +11,97 @@ namespace InvoicingApp.Application.Services
     {
         private readonly IInvoiceRepository _invoiceRepository;
         private readonly IClientRepository _clientRepository;
+        private readonly IPdfService _pdfService;
 
-        public InvoiceService(IInvoiceRepository invoiceRepository, IClientRepository clientRepository)
+        public InvoiceService(
+            IInvoiceRepository invoiceRepository, 
+            IClientRepository clientRepository,
+            IPdfService pdfService)
         {
             _invoiceRepository = invoiceRepository;
             _clientRepository = clientRepository;
+            _pdfService = pdfService;
         }
 
-        public async Task<IEnumerable<InvoiceDto>> GetAllInvoicesAsync()
+        public async Task<PagedResultDto<InvoiceDto>> GetFilteredInvoicesAsync(
+            int page = 1, 
+            int limit = 10, 
+            InvoiceStatus? status = null, 
+            DateTime? startDate = null, 
+            DateTime? endDate = null, 
+            string? search = null, 
+            bool includeDrafts = false)
         {
-            var invoices = await _invoiceRepository.FindAsync(i => i.Status != InvoiceStatus.Draft);
+            // Get all invoices with client data
+            var allInvoices = await _invoiceRepository.GetAllInvoicesWithClientsAsync();
+            
+            // Apply filters
+            var filteredInvoices = allInvoices.AsQueryable();
+            
+            // Status filter
+            if (status.HasValue)
+            {
+                filteredInvoices = filteredInvoices.Where(i => i.Status == status.Value);
+            }
+            else if (!includeDrafts)
+            {
+                filteredInvoices = filteredInvoices.Where(i => i.Status != InvoiceStatus.Draft);
+            }
+            
+            // Date range filter
+            if (startDate.HasValue)
+            {
+                var start = startDate.Value.Date;
+                filteredInvoices = filteredInvoices.Where(i => i.IssueDate >= start);
+            }
+            
+            if (endDate.HasValue)
+            {
+                var end = endDate.Value.Date.AddDays(1).AddTicks(-1); // End of the day
+                filteredInvoices = filteredInvoices.Where(i => i.IssueDate <= end);
+            }
+            
+            // Search filter - search in invoice number or client name
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.ToLower();
+                filteredInvoices = filteredInvoices.Where(i => 
+                    i.InvoiceNumber.ToLower().Contains(search) ||
+                    (i.Client != null && i.Client.Name.ToLower().Contains(search)));
+            }
+            
+            // Count total results after filtering but before pagination
+            var totalCount = filteredInvoices.Count();
+            
+            // Apply pagination
+            var pagedInvoices = filteredInvoices
+                .Skip((page - 1) * limit)
+                .Take(limit)
+                .ToList();
+                
+            // Convert to DTOs
+            var invoiceDtos = pagedInvoices.Select(i => i.ToDto());
+            
+            // Return paged result
+            return new PagedResultDto<InvoiceDto>(invoiceDtos, totalCount, page, limit);
+        }
+
+        public async Task<IEnumerable<InvoiceDto>> GetAllInvoicesAsync(bool includeDrafts = false)
+        {
+            IEnumerable<Invoice> invoices;
+            
+            // Let's add the client data by loading all invoices with their clients
+            if (includeDrafts)
+            {
+                // Return all invoices including drafts
+                invoices = await _invoiceRepository.GetAllInvoicesWithClientsAsync();
+            }
+            else
+            {
+                // Return only non-draft invoices
+                invoices = await _invoiceRepository.GetInvoicesByStatusAsync(InvoiceStatus.Draft, exclude: true);
+            }
+            
             return invoices.Select(i => i.ToDto());
         }
 
@@ -163,9 +244,16 @@ namespace InvoicingApp.Application.Services
                 throw new InvalidOperationException("Cannot change status of a cancelled invoice.");
             }
 
-            if (invoice.Status == InvoiceStatus.Paid && statusDto.Status != InvoiceStatus.PartiallyPaid)
+            // If we're marking as paid, set the PaidAt timestamp
+            if (statusDto.Status == InvoiceStatus.Paid)
             {
-                throw new InvalidOperationException("Paid invoice can only be changed to partially paid status.");
+                // If PaidAt is provided in the DTO, use it; otherwise use current time
+                invoice.PaidAt = statusDto.PaidAt ?? DateTime.UtcNow;
+            }
+            else if (invoice.Status == InvoiceStatus.Paid && statusDto.Status != InvoiceStatus.Paid)
+            {
+                // If changing from paid to another status, clear the PaidAt timestamp
+                invoice.PaidAt = null;
             }
 
             invoice.Status = statusDto.Status;
@@ -236,6 +324,17 @@ namespace InvoicingApp.Application.Services
             }
 
             return invoice.ToDto();
+        }
+        
+        public async Task<byte[]> GenerateInvoicePdfAsync(int id)
+        {
+            var invoice = await GetInvoiceByIdAsync(id);
+            if (invoice == null)
+            {
+                throw new KeyNotFoundException($"Invoice with ID {id} not found");
+            }
+            
+            return await _pdfService.GenerateInvoicePdfAsync(invoice);
         }
     }
 } 

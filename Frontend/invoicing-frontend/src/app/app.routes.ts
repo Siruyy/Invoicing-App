@@ -19,9 +19,11 @@ export const routes: Routes = [
     path: 'invoices/:id/edit',
     loadComponent: () => import('./features/invoices/invoice-form.component').then(m => m.InvoiceFormComponent)
   },
+  // Redirect /invoices/:id to the edit form for simplicity
   {
     path: 'invoices/:id',
-    loadComponent: () => import('./features/invoices/invoice-detail.component').then(m => m.InvoiceDetailComponent)
+    redirectTo: 'invoices/:id/edit',
+    pathMatch: 'full'
   },
   // Client Management routes
   {

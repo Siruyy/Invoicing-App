@@ -23,17 +23,23 @@ export interface Invoice {
   invoiceNumber: string;
   client: Client | number;
   clientId?: number;
+  companyName?: string;
+  companyAddress?: string;
   issueDate: Date;
   dueDate: Date;
   status: InvoiceStatus;
   items: InvoiceItem[];
   subtotal?: number;
+  taxRate?: number;
   taxAmount?: number;
   discount?: number;
-  total?: number;
+  totalAmount?: number; // Match the backend field name 
+  total?: number;       // Keep for backward compatibility
   notes?: string;
   terms?: string;
   createdAt?: Date;
   updatedAt?: Date;
   paidAt?: Date;
+  currency?: string;
+  exchangeRate?: number;
 } 

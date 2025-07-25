@@ -5,11 +5,20 @@ namespace InvoicingApp.Application.Interfaces
 {
     public interface IInvoiceService
     {
-        Task<IEnumerable<InvoiceDto>> GetAllInvoicesAsync();
+        Task<IEnumerable<InvoiceDto>> GetAllInvoicesAsync(bool includeDrafts = false);
+        Task<PagedResultDto<InvoiceDto>> GetFilteredInvoicesAsync(
+            int page = 1, 
+            int limit = 10, 
+            InvoiceStatus? status = null, 
+            DateTime? startDate = null, 
+            DateTime? endDate = null, 
+            string? search = null, 
+            bool includeDrafts = false);
         Task<InvoiceDto?> GetInvoiceByIdAsync(int id);
         Task<IEnumerable<InvoiceDto>> GetInvoicesByClientAsync(int clientId);
         Task<IEnumerable<InvoiceDto>> GetInvoicesByStatusAsync(InvoiceStatus status);
         Task<IEnumerable<InvoiceDto>> GetOverdueInvoicesAsync();
+        Task<byte[]> GenerateInvoicePdfAsync(int id);
         Task<int> CreateInvoiceAsync(CreateInvoiceDto invoiceDto);
         Task UpdateInvoiceAsync(UpdateInvoiceDto invoiceDto);
         Task UpdateInvoiceStatusAsync(UpdateInvoiceStatusDto statusDto);

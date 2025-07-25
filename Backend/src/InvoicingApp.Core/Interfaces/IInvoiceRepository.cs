@@ -7,9 +7,10 @@ namespace InvoicingApp.Core.Interfaces
     {
         Task<Invoice?> GetInvoiceWithDetailsAsync(int id);
         Task<IEnumerable<Invoice>> GetInvoicesByClientAsync(int clientId);
-        Task<IEnumerable<Invoice>> GetInvoicesByStatusAsync(InvoiceStatus status);
+        Task<IEnumerable<Invoice>> GetInvoicesByStatusAsync(InvoiceStatus status, bool exclude = false);
         Task<IEnumerable<Invoice>> GetOverdueInvoicesAsync();
         Task<string> GenerateInvoiceNumberAsync();
         Task RemoveInvoiceItemsAsync(int invoiceId);
+        Task<IEnumerable<Invoice>> GetAllInvoicesWithClientsAsync();
     }
 } 
