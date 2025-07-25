@@ -1,190 +1,70 @@
-.invoice-form-container {
+.invoice-card {
+  background-color: var(--surface-a);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--surface-d);
+  padding: 24px;
   margin-bottom: 2rem;
 }
 
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+/* Form Header */
 .form-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e2e8f0; /* slate-200 */
+  margin-bottom: 1rem;
   
-  .form-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0;
-    color: #1e293b; /* slate-800 */
+  .form-title-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    
+    .form-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--text-color);
+    }
+  }
+  
+  .action-buttons {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+    
+    button {
+      margin-right: 0.75rem;
+    }
+    
+    .paid-date {
+      margin-left: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--text-color-secondary);
+    }
   }
 }
 
 .form-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  align-items: center;
   
   button {
-    min-width: 100px; /* Ensure consistent button width */
-    padding: 0.5rem 1rem; /* Add comfortable padding */
-    
-    &.p-button-secondary {
-      font-weight: 500;
-    }
-    
-    &.p-button-success, &.p-button {
-      font-weight: 500;
-    }
-    
-    .p-button-icon {
-      margin-right: 0.375rem; /* Ensure consistent icon spacing */
-    }
-  }
-}
-
-/* Dark mode styles */
-:host-context(.dark) {
-  .form-header {
-    border-bottom-color: #334155; /* slate-700 */
-    
-    .form-title {
-      color: #f1f5f9; /* slate-100 */
-    }
-  }
-}
-
-.section-title {
-  font-weight: 500;
-  margin-bottom: 1rem;
-  color: var(--gray-700);
-}
-
-.field-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.field {
-  flex: 1;
-  
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    font-size: 0.875rem;
-    color: var(--gray-700);
-  }
-}
-
-.field-sm {
-  flex: 0.5;
-}
-
-.item-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin: 1rem 0;
-}
-
-.items-table {
-  width: 100%;
-  
-  th {
-    text-align: left;
-    font-weight: 500;
-    padding: 0.75rem;
-    background-color: var(--surface-100);
-    border-bottom: 1px solid var(--surface-200);
-  }
-  
-  td {
-    padding: 0.75rem;
-    border-bottom: 1px solid var(--surface-200);
-  }
-  
-  tr:last-child td {
-    border-bottom: none;
-  }
-  
-  .actions-cell {
-    width: 50px;
-    text-align: center;
-  }
-  
-  .description-cell {
-    width: 40%;
-  }
-  
-  .quantity-cell, .price-cell {
-    width: 20%;
-  }
-  
-  .total-cell {
-    width: 20%;
-  }
-}
-
-.totals-container {
-  margin-top: 1.5rem;
-  border-top: 1px solid var(--surface-200);
-  padding-top: 1rem;
-}
-
-.total-row {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  
-  .label {
-    font-weight: 500;
-    width: 150px;
-    text-align: right;
-    margin-right: 1rem;
-  }
-  
-  .value {
-    font-weight: 400;
-    width: 150px;
-    text-align: right;
-  }
-  
-  &.grand-total {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--surface-200);
-    
-    .label, .value {
-      font-weight: 600;
-      font-size: 1.125rem;
-    }
-  }
-}
-
-.autosave-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  margin-top: 1rem;
-  color: var(--gray-500);
-  font-size: 0.875rem;
-  
-  .pi {
-    margin-right: 0.5rem;
-  }
-  
-  &.saving {
-    color: var(--blue-500);
-  }
-}
-
-// Add interactive hover and click states
-:host ::ng-deep {
-  .p-button {
+    min-width: 100px;
     transition: all 0.2s ease;
+    font-weight: 500;
     
     &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     
     &:active {
@@ -192,50 +72,436 @@
     }
   }
   
-  .p-button.p-button-text:hover {
-    background-color: var(--surface-100);
-  }
-  
-  .p-inputtext, .p-dropdown, .p-calendar {
-    transition: border-color 0.2s, box-shadow 0.2s;
-    
-    &:hover:not(.p-disabled):not(.p-invalid) {
-      border-color: var(--primary-color);
-    }
-    
-    &:focus:not(.p-disabled):not(.p-invalid) {
-      box-shadow: 0 0 0 1px var(--primary-color-light);
-      border-color: var(--primary-color);
-    }
-  }
-  
-  .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
-    transition: background-color 0.2s;
+  .cancel-btn {
+    color: #ef4444;
+    border-color: #ef4444;
     
     &:hover {
-      background-color: var(--surface-100);
+      background-color: rgba(239, 68, 68, 0.08);
+    }
+  }
+  
+  .draft-btn {
+    color: #f59e0b;
+    border-color: #f59e0b;
+    
+    &:hover {
+      background-color: rgba(245, 158, 11, 0.08);
+    }
+  }
+  
+  .save-btn {
+    background-color: #10b981;
+    border-color: #10b981;
+    
+    &:hover {
+      background-color: #059669;
+      border-color: #059669;
     }
   }
 }
 
-// Dark theme overrides
-:host-context(.dark) {
-  .section-title, .field label {
-    color: var(--gray-300);
+.divider {
+  height: 1px;
+  background-color: var(--surface-d);
+  margin: 1rem 0 1.5rem;
+}
+
+/* Client & Invoice Info Section */
+.invoice-info-section {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  
+  @media (max-width: 992px) {
+    flex-direction: column;
+  }
+}
+
+.client-info-column {
+  flex: 1;
+  
+  .billed-to {
+    .section-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      color: var(--text-color-secondary);
+    }
+  }
+}
+
+.invoice-details-column {
+  flex: 1;
+}
+
+.invoice-total-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  
+  .invoice-currency {
+    font-size: 0.875rem;
+    color: var(--text-color-secondary);
+    margin-bottom: 0.5rem;
   }
   
-  .items-table {
-    th {
-      background-color: var(--gray-800);
-      border-bottom: 1px solid var(--gray-700);
+  .invoice-amount {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-color);
+  }
+  
+  @media (max-width: 992px) {
+    align-items: flex-start;
+    margin-top: 1rem;
+  }
+}
+
+.field-group {
+  margin-bottom: 1rem;
+  
+  label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    color: var(--text-color-secondary);
+  }
+}
+
+/* Add Item Section */
+.add-item-section {
+  background-color: var(--surface-b);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.add-item-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  
+  .item-description {
+    flex: 2;
+  }
+  
+  .item-quantity, .item-price {
+    flex: 1;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-weight: 500;
+    font-size: 0.75rem;
+    color: var(--text-color-secondary);
+  }
+  
+  .add-btn {
+    background-color: #10b981;
+    border-color: #10b981;
+    height: 36px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    padding: 0 14px;
+    
+    &:hover {
+      background-color: #059669;
+      border-color: #059669;
+      transform: translateY(-2px);
     }
     
-    td {
-      border-bottom: 1px solid var(--gray-700);
+    &:active {
+      transform: scale(0.98);
     }
   }
   
-  .totals-container, .total-row.grand-total {
-    border-top: 1px solid var(--gray-700);
+  @media (max-width: 768px) {
+    flex-wrap: wrap;
+    
+    .item-description {
+      flex: 100%;
+    }
+    
+    .item-quantity, .item-price {
+      flex: 1;
+    }
+    
+    .add-btn {
+      margin-top: 0.5rem;
+      width: 100%;
+    }
+  }
+}
+
+/* Items List Section */
+.items-section {
+  margin-bottom: 1.5rem;
+}
+
+.items-list {
+  .item-row {
+    display: flex;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--surface-d);
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    .item-details {
+      flex: 2;
+      
+      .item-name {
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+      }
+      
+      .item-description {
+        font-size: 0.875rem;
+        color: var(--text-color-secondary);
+      }
+    }
+    
+    .item-quantity {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    
+    .item-price {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    
+    .item-total {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+    }
+    
+    .item-actions {
+      width: 40px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+  }
+}
+
+.totals-section {
+  margin-top: 1rem;
+  padding-right: 40px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+  
+  .total-label {
+    min-width: 120px;
+    text-align: right;
+    margin-right: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    
+    ::ng-deep .p-inputnumber {
+      width: 60px;
+      display: inline-block;
+      
+      input {
+        text-align: center;
+        padding: 0.25rem;
+        font-size: 0.875rem;
+      }
+    }
+  }
+  
+  .total-value {
+    min-width: 100px;
+    text-align: right;
+    font-weight: 500;
+  }
+  
+  &.total-row-final {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--surface-d);
+    
+    .total-label, .total-value {
+      font-weight: 700;
+      font-size: 1.125rem;
+    }
+  }
+}
+
+/* Autosave container */
+.autosave-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.autosave-indicator {
+  display: flex;
+  align-items: center;
+  color: var(--text-color-secondary);
+  font-size: 0.875rem;
+  
+  .pi {
+    margin-right: 0.5rem;
+  }
+  
+  &.saving {
+    color: var(--primary-color);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .form-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .form-actions {
+    width: 100%;
+    button {
+      flex: 1;
+    }
+  }
+}
+
+/* PrimeNG Component Overrides */
+:host ::ng-deep {
+  .p-dropdown {
+    width: 100%;
+    max-width: 350px;
+  }
+  
+  .p-calendar {
+    width: 100%;
+    max-width: 350px;
+    
+    .p-inputtext {
+      width: 100%;
+      background-color: var(--surface-card, #ffffff);
+    }
+    
+    .p-datepicker-trigger {
+      background-color: var(--surface-b);
+      border-color: var(--surface-d);
+      color: var(--text-color);
+      &:hover {
+        background-color: var(--surface-c);
+      }
+    }
+    
+    .p-datepicker {
+      background-color: var(--surface-card, #ffffff);
+    }
+  }
+  
+  .p-inputnumber {
+    width: 100%;
+    max-width: 350px;
+  }
+  
+  .p-inputtext {
+    width: 100%;
+    max-width: 350px;
+  }
+  
+  .add-btn {
+    padding: 0.5rem 0.875rem;
+  }
+}
+
+/* Email Preview */
+.email-preview-container {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background-color: var(--surface-b);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  
+  .email-preview-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--surface-d);
+    
+    p {
+      margin: 0.5rem 0;
+    }
+  }
+  
+  .email-preview-body {
+    p {
+      margin-bottom: 0.75rem;
+      line-height: 1.5;
+    }
+  }
+  
+  .email-preview-attachment {
+    margin-top: 1.5rem;
+    padding: 0.75rem;
+    background-color: var(--surface-c);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-color-secondary);
+    
+    i {
+      color: #f03e3e;
+    }
+  }
+}
+
+/* Currency Dropdown */
+.invoice-currency {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Dark mode overrides */
+:host-context(.dark) {
+  .invoice-card {
+    background-color: var(--surface-a);
+  }
+  
+  .divider {
+    background-color: var(--surface-d);
+  }
+  
+  .add-item-section {
+    background-color: var(--surface-b);
+  }
+  
+  .items-list .item-row {
+    border-bottom-color: var(--surface-d);
+  }
+  
+  .total-row-final {
+    border-top-color: var(--surface-d);
+  }
+  
+  .email-preview-container {
+    background-color: var(--surface-b);
+  }
+  
+  .email-preview-attachment {
+    background-color: var(--surface-c);
   }
 } 

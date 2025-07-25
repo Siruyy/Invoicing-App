@@ -1,0 +1,185 @@
+<app-card [noPadding]="false" class="strong-shadow">
+  <div class="invoice-detail-container">
+    <!-- Loading state -->
+    <div *ngIf="loading" class="p-4 text-center">
+      <i class="pi pi-spin pi-spinner text-4xl mb-3"></i>
+      <p>Loading invoice data...</p>
+    </div>
+    
+    <!-- Error state -->
+    <div *ngIf="error && !loading" class="p-4 text-center">
+      <i class="pi pi-exclamation-triangle text-4xl mb-3 text-red-500"></i>
+      <p class="text-red-500">{{ error }}</p>
+      <button pButton type="button" label="Go Back" icon="pi pi-arrow-left" class="mt-4" routerLink="/invoices"></button>
+    </div>
+    
+    <!-- Invoice content -->
+    <div *ngIf="invoice && !loading && !error" class="invoice-form-layout">
+      <!-- Header with actions -->
+      <div class="form-header">
+        <div class="form-title-section">
+          <h1 class="form-title">Invoice #{{ invoice.invoiceNumber }}</h1>
+          <p-tag 
+            [value]="invoice.status" 
+            [severity]="getStatusSeverity(invoice.status)">
+          </p-tag>
+        </div>
+        
+        <div class="form-actions">
+          <!-- Payment toggle switch -->
+          <div *ngIf="invoice.status !== InvoiceStatus.DRAFT" class="payment-toggle">
+            <label class="toggle-label">Paid</label>
+            <p-inputSwitch 
+              [ngModel]="invoice.status === InvoiceStatus.PAID" 
+              (onChange)="togglePaymentStatus($event)"
+              [disabled]="updating">
+            </p-inputSwitch>
+            <span *ngIf="invoice.status === InvoiceStatus.PAID && invoice.paidAt" class="paid-date">
+              Paid on {{ invoice.paidAt | date:'mediumDate' }}
+            </span>
+          </div>
+          
+          <!-- Action buttons -->
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-arrow-left" 
+            label="Back" 
+            class="p-button-outlined p-button-secondary" 
+            routerLink="/invoices">
+          </button>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-pencil" 
+            label="Edit" 
+            class="p-button-outlined" 
+            [routerLink]="['/invoices', invoice.id, 'edit']"
+            *ngIf="invoice.status === InvoiceStatus.DRAFT">
+          </button>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-envelope" 
+            label="Send" 
+            class="p-button-outlined p-button-info"
+            (click)="sendInvoice()"
+            *ngIf="invoice.status === InvoiceStatus.DRAFT"
+            [disabled]="updating">
+          </button>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-file-pdf" 
+            label="Download PDF" 
+            class="p-button-outlined p-button-secondary"
+            (click)="downloadPdf()"
+            [disabled]="updating">
+          </button>
+          <button 
+            pButton 
+            type="button" 
+            icon="pi pi-trash" 
+            label="Delete" 
+            class="p-button-outlined p-button-danger"
+            (click)="confirmDelete()"
+            [disabled]="updating">
+          </button>
+        </div>
+      </div>
+      
+      <!-- Main invoice content -->
+      <div class="invoice-content">
+        <!-- Left column: Client & Invoice details -->
+        <div class="left-column">
+          <!-- Client Selection -->
+          <div class="form-section">
+            <h3 class="section-title">Client Information</h3>
+            <div class="client-info">
+              <div class="client-name">{{ invoice.client | safeClient }}</div>
+              <div *ngIf="getClientEmail(invoice.client)" class="client-email">
+                <i class="pi pi-envelope"></i> {{ getClientEmail(invoice.client) }}
+              </div>
+              <div *ngIf="getClientPhone(invoice.client)" class="client-phone">
+                <i class="pi pi-phone"></i> {{ getClientPhone(invoice.client) }}
+              </div>
+              <div *ngIf="getClientAddress(invoice.client)" class="client-address">
+                <i class="pi pi-map-marker"></i> {{ getClientAddress(invoice.client) }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Invoice Details -->
+          <div class="form-section">
+            <h3 class="section-title">Invoice Details</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Issue Date</label>
+                <div class="field-value">{{ invoice.issueDate | date:'mediumDate' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Due Date</label>
+                <div class="field-value">{{ invoice.dueDate | date:'mediumDate' }}</div>
+              </div>
+            </div>
+            <div class="form-row" *ngIf="invoice.notes">
+              <div class="form-group full-width">
+                <label>Notes</label>
+                <div class="field-value">{{ invoice.notes }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right column: Line Items & Totals -->
+        <div class="right-column">
+          <!-- Line Items -->
+          <div class="form-section">
+            <h3 class="section-title">Items</h3>
+            
+            <table class="invoice-items-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th class="numeric">Qty</th>
+                  <th class="numeric">Price</th>
+                  <th class="numeric">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of invoice.items">
+                  <td>{{ item.description }}</td>
+                  <td class="numeric">{{ item.quantity }}</td>
+                  <td class="numeric">{{ item.unitPrice | currency }}</td>
+                  <td class="numeric">{{ (item.quantity * item.unitPrice) | currency }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Totals -->
+          <div class="invoice-totals">
+            <div class="totals-row">
+              <div class="totals-label">Subtotal</div>
+              <div class="totals-value">{{ invoice.subtotal | currency }}</div>
+            </div>
+            <div class="totals-row" *ngIf="invoice.taxRate">
+              <div class="totals-label">Tax ({{ invoice.taxRate }}%)</div>
+              <div class="totals-value">{{ invoice.taxAmount | currency }}</div>
+            </div>
+            <div class="totals-row total">
+              <div class="totals-label">Total</div>
+              <div class="totals-value">{{ invoice.totalAmount | currency }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-card>
+
+<!-- Confirmation dialog for delete -->
+<p-confirmDialog header="Delete Invoice" icon="pi pi-exclamation-triangle"></p-confirmDialog>
+
+<!-- Toast messages -->
+<p-toast></p-toast>

@@ -22,13 +22,32 @@ namespace InvoicingApp.Infrastructure.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.Email).HasMaxLength(100);
-                entity.Property(e => e.Phone).HasMaxLength(20);
-                entity.Property(e => e.Address).HasMaxLength(200);
-                entity.Property(e => e.City).HasMaxLength(100);
-                entity.Property(e => e.State).HasMaxLength(50);
-                entity.Property(e => e.ZipCode).HasMaxLength(20);
-                entity.Property(e => e.Country).HasMaxLength(50);
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
+                
+                // Optional fields with explicit nullability
+                entity.Property(e => e.Phone).HasMaxLength(20).IsRequired(false);
+                entity.Property(e => e.Address).HasMaxLength(200).IsRequired(false);
+                entity.Property(e => e.City).HasMaxLength(100).IsRequired(false);
+                entity.Property(e => e.State).HasMaxLength(50).IsRequired(false);
+                entity.Property(e => e.ZipCode).HasMaxLength(20).IsRequired(false);
+                entity.Property(e => e.Country).HasMaxLength(50).IsRequired(false);
+                
+                // New properties - with explicit column name mapping and nullability
+                entity.Property(e => e.CompanyName)
+                    .HasColumnName("CompanyName")
+                    .HasMaxLength(100)
+                    .IsRequired(false);
+                entity.Property(e => e.ContactPerson)
+                    .HasColumnName("ContactPerson")
+                    .HasMaxLength(100)
+                    .IsRequired(false);
+                entity.Property(e => e.TaxNumber)
+                    .HasColumnName("TaxNumber")
+                    .HasMaxLength(50)
+                    .IsRequired(false);
+                entity.Property(e => e.Notes)
+                    .HasColumnName("Notes")
+                    .IsRequired(false);
             });
 
             // Invoice configuration

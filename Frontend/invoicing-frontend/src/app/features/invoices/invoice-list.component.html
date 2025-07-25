@@ -34,6 +34,7 @@
       [totalRecords]="totalRecords"
       [rowsPerPageOptions]="[5, 10, 25, 50]"
       [lazy]="true"
+      [(first)]="first"
       (onPage)="onPageChange($event)"
       class="invoice-table" 
       [rowHover]="true" 
@@ -53,11 +54,11 @@
       <ng-template pTemplate="body" let-row>
         <tr (click)="goTo(row)" class="invoice-row cursor-pointer">
           <td>{{ row.invoiceNumber }}</td>
-          <td>{{ row.client.name }}</td>
+          <td>{{ row.client | safeClient }}</td>
           <td>{{ row.issueDate | date:'MMM d, y' }}</td>
           <td>{{ row.dueDate | date:'MMM d, y' }}</td>
           <td><p-tag [value]="row.status" [severity]="getStatusSeverity(row.status)"></p-tag></td>
-          <td class="text-right">{{ row.total | currency }}</td>
+          <td class="text-right">{{ row.totalAmount | currency }}</td>
         </tr>
       </ng-template>
 

@@ -19,7 +19,13 @@ namespace InvoicingApp.Application.Mapping
                 City = entity.City,
                 State = entity.State,
                 ZipCode = entity.ZipCode,
-                Country = entity.Country
+                Country = entity.Country,
+                CompanyName = entity.CompanyName,
+                ContactPerson = entity.ContactPerson,
+                TaxNumber = entity.TaxNumber,
+                Notes = entity.Notes,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt
             };
         }
 
@@ -35,6 +41,10 @@ namespace InvoicingApp.Application.Mapping
                 State = dto.State,
                 ZipCode = dto.ZipCode,
                 Country = dto.Country,
+                CompanyName = dto.CompanyName,
+                ContactPerson = dto.ContactPerson,
+                TaxNumber = dto.TaxNumber,
+                Notes = dto.Notes,
                 CreatedAt = DateTime.UtcNow
             };
         }
@@ -49,6 +59,10 @@ namespace InvoicingApp.Application.Mapping
             entity.State = dto.State;
             entity.ZipCode = dto.ZipCode;
             entity.Country = dto.Country;
+            entity.CompanyName = dto.CompanyName;
+            entity.ContactPerson = dto.ContactPerson;
+            entity.TaxNumber = dto.TaxNumber;
+            entity.Notes = dto.Notes;
             entity.UpdatedAt = DateTime.UtcNow;
         }
 

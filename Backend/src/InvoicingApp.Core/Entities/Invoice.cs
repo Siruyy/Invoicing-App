@@ -15,6 +15,9 @@ namespace InvoicingApp.Core.Entities
         public decimal TotalAmount { get; set; }
         public string Notes { get; set; } = string.Empty;
         public InvoiceStatus Status { get; set; } = InvoiceStatus.Draft;
+        public DateTime? PaidAt { get; set; }
+        public string Currency { get; set; } = "USD";
+        public decimal ExchangeRate { get; set; } = 1;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
         

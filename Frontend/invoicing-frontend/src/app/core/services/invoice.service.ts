@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { Invoice, InvoiceStatus } from '../models/invoice.model';
 import { HttpParams } from '@angular/common/http';
@@ -10,13 +11,15 @@ import { HttpParams } from '@angular/common/http';
 export class InvoiceService {
   constructor(private api: ApiService) { }
 
-  getInvoices(page: number = 1, limit: number = 10, status?: InvoiceStatus, clientId?: number, search?: string): Observable<{ items: Invoice[], total: number }> {
+  getInvoices(page: number = 1, limit: number = 10, status?: InvoiceStatus, clientId?: number, search?: string, includeDrafts: boolean = true, startDate?: Date, endDate?: Date): Observable<{ items: Invoice[], total: number }> {
     let params = new HttpParams()
       .set('page', page.toString())
-      .set('limit', limit.toString());
+      .set('limit', limit.toString())
+      .set('includeDrafts', includeDrafts.toString());
     
     if (status) {
-      params = params.set('status', status);
+      // Map the status to numeric value for the backend
+      params = params.set('status', this.mapStatusToBackend(status).toString());
     }
     
     if (clientId) {
@@ -27,19 +30,164 @@ export class InvoiceService {
       params = params.set('search', search);
     }
     
-    return this.api.get<{ items: Invoice[], total: number }>('/invoices', params);
+    if (startDate) {
+      params = params.set('startDate', startDate.toISOString());
+    }
+    
+    if (endDate) {
+      params = params.set('endDate', endDate.toISOString());
+    }
+    
+    return this.api.get<any>('/invoices', params).pipe(
+      map(response => {
+        console.log('API response:', response);
+        
+        // Handle different response formats: array or object with items property
+        let items = [];
+        let total = 0;
+        
+        if (Array.isArray(response)) {
+          // Response is an array of invoices
+          items = response;
+          total = response.length;
+        } else if (response && response.items && Array.isArray(response.items)) {
+          // Response has items property which is an array
+          items = response.items;
+          total = response.total || items.length;
+        } else if (!response) {
+          console.error('Empty response from API');
+          return { items: [], total: 0 };
+        } else {
+          console.error('Invalid response format:', response);
+          return { items: [], total: 0 };
+        }
+        
+        // Map numeric status values to string enum values
+        const mappedItems = items.map((item: any) => {
+          if (!item) return null;
+          
+          // Process the invoice data
+          const processedItem = {
+            ...item,
+            // Map backend to frontend properties
+            status: item.status !== undefined ? this.mapStatusFromBackend(item.status) : InvoiceStatus.DRAFT,
+            // Ensure total is set for backward compatibility
+            total: item.totalAmount || item.total || 0
+          };
+          
+          // Debug client data
+          if (typeof processedItem.client === 'undefined' || processedItem.client === null) {
+            if (processedItem.clientId) {
+              console.log(`Invoice ${processedItem.invoiceNumber} has clientId ${processedItem.clientId} but no client object`);
+            } else {
+              console.warn(`Invoice ${processedItem.invoiceNumber} has no client data`);
+            }
+          } else if (typeof processedItem.client === 'object') {
+            console.log(`Invoice ${processedItem.invoiceNumber} has client object with name: ${processedItem.client.name || 'MISSING NAME!'}`);
+          }
+          
+          return processedItem;
+        }).filter((item: any) => item !== null);
+        
+        return {
+          items: mappedItems,
+          total: total || mappedItems.length
+        };
+      })
+    );
+  }
+  
+  // Helper method to map numeric status from backend to frontend string enum
+  private mapStatusFromBackend(status: number): InvoiceStatus {
+    switch(status) {
+      case 0: return InvoiceStatus.DRAFT;
+      case 1: return InvoiceStatus.PENDING;
+      case 2: return InvoiceStatus.PAID;
+      case 3: return InvoiceStatus.OVERDUE;
+      case 4: return InvoiceStatus.CANCELLED;
+      default: return InvoiceStatus.DRAFT;
+    }
+  }
+  
+  // Helper method to map frontend string enum to numeric status for backend
+  private mapStatusToBackend(status: InvoiceStatus): number {
+    switch(status) {
+      case InvoiceStatus.DRAFT: return 0;
+      case InvoiceStatus.PENDING: return 1;
+      case InvoiceStatus.PAID: return 2;
+      case InvoiceStatus.OVERDUE: return 3;
+      case InvoiceStatus.CANCELLED: return 4;
+      default: return 0;
+    }
   }
 
   getInvoiceById(id: number): Observable<Invoice> {
-    return this.api.get<Invoice>(`/invoices/${id}`);
+    return this.api.get<any>(`/invoices/${id}`).pipe(
+      map(invoice => {
+        if (!invoice) {
+          console.error('Invoice not found or invalid response');
+          throw new Error('Invoice not found');
+        }
+        return {
+          ...invoice,
+          status: invoice.status !== undefined ? this.mapStatusFromBackend(invoice.status) : InvoiceStatus.DRAFT
+        };
+      })
+    );
   }
 
   createInvoice(invoice: Invoice): Observable<Invoice> {
-    return this.api.post<Invoice>('/invoices', invoice);
+    // Map the status to numeric value for the backend
+    const mappedInvoice = {
+      ...invoice,
+      status: this.mapStatusToBackend(invoice.status || InvoiceStatus.DRAFT)
+    };
+    
+    console.log('Sending create payload:', mappedInvoice); // Debug log
+    return this.api.post<any>('/invoices', mappedInvoice).pipe(
+      map(response => {
+        if (!response) {
+          console.warn('Empty response from createInvoice');
+          // Return a default structure with the invoice data
+          return {
+            ...invoice,
+            id: 0  // We don't know the ID yet
+          };
+        }
+        return {
+          ...response,
+          status: response.status !== undefined ? this.mapStatusFromBackend(response.status) : invoice.status || InvoiceStatus.DRAFT
+        };
+      })
+    );
   }
 
   updateInvoice(id: number, invoice: Invoice): Observable<Invoice> {
-    return this.api.put<Invoice>(`/invoices/${id}`, invoice);
+    // Map the status to numeric value for the backend
+    const mappedInvoice = {
+      ...invoice,
+      status: this.mapStatusToBackend(invoice.status || InvoiceStatus.DRAFT)
+    };
+    
+    console.log('Sending update payload:', mappedInvoice); // Debug log
+    return this.api.put<any>(`/invoices/${id}`, mappedInvoice).pipe(
+      map(response => {
+        // The update endpoint returns 204 No Content
+        // So we just return the original invoice with its ID
+        return {
+          ...invoice,
+          id: id
+        };
+      }),
+      catchError(error => {
+        console.error('Error updating invoice:', error);
+        // Return the original invoice anyway to prevent UI errors
+        return of({
+          ...invoice,
+          id: id
+        });
+      })
+    );
   }
 
   deleteInvoice(id: number): Observable<void> {
@@ -47,11 +195,31 @@ export class InvoiceService {
   }
   
   updateInvoiceStatus(id: number, status: InvoiceStatus): Observable<Invoice> {
-    return this.api.patch<Invoice>(`/invoices/${id}/status`, { status });
+    // Map the status to numeric value for the backend
+    const mappedStatus = this.mapStatusToBackend(status);
+    return this.api.put<any>(`/invoices/${id}/status`, { 
+      id: id,  // Include the ID in the request body
+      status: mappedStatus,
+      paidAt: status === InvoiceStatus.PAID ? new Date().toISOString() : null
+    }).pipe(
+      map(response => {
+        return {
+          ...response,
+          status: this.mapStatusFromBackend(response.status)
+        };
+      })
+    );
   }
   
   markAsPaid(id: number): Observable<Invoice> {
-    return this.updateInvoiceStatus(id, InvoiceStatus.PAID);
+    return this.api.patch<any>(`/invoices/${id}/mark-as-paid`, {}).pipe(
+      map(response => {
+        return {
+          ...response,
+          status: this.mapStatusFromBackend(response.status)
+        };
+      })
+    );
   }
   
   generateInvoicePdf(id: number): Observable<Blob> {
@@ -60,13 +228,38 @@ export class InvoiceService {
 
   generateInvoiceNumber(): Observable<string> {
     // Call the backend API to generate an invoice number
-    return this.api.get<string>('/invoices/generate-number');
+    return this.api.get<{invoiceNumber: string}>('/invoices/generate-number')
+      .pipe(
+        map(response => response.invoiceNumber)
+      );
     
     // Fallback if API is not available yet
     // return of(`INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`);
   }
 
   saveDraft(invoice: Invoice): Observable<Invoice> {
-    return this.api.post<Invoice>('/invoices/drafts', invoice);
+    // Map the status to numeric value for the backend
+    const mappedInvoice = {
+      ...invoice,
+      status: this.mapStatusToBackend(invoice.status)
+    };
+    
+    return this.api.post<any>('/invoices/drafts', mappedInvoice).pipe(
+      map(response => {
+        return {
+          ...response,
+          status: this.mapStatusFromBackend(response.status)
+        };
+      })
+    );
+  }
+  
+  sendInvoiceEmail(id: number, recipientEmail: string): Observable<void> {
+    // Match the backend model property name
+    return this.api.post<void>(`/invoices/${id}/send`, { recipientEmail: recipientEmail });
+  }
+  
+  downloadInvoicePdf(id: number): Observable<Blob> {
+    return this.api.getBlob(`/invoices/${id}/pdf`);
   }
 } 
