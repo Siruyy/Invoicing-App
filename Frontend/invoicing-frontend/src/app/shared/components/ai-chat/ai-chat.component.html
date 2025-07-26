@@ -1,0 +1,80 @@
+<div class="chat-toggle-button" *ngIf="!visible" (click)="toggleChat()">
+  <i class="pi pi-comments"></i>
+</div>
+
+<p-dialog 
+  [(visible)]="visible"
+  [modal]="false"
+  [draggable]="true"
+  [resizable]="true"
+  [style]="dialogStyle"
+  [contentStyle]="{'max-height': minimized ? '0' : '650px', 'overflow': 'hidden', 'transition': 'max-height 0.3s ease'}"
+  [showHeader]="true"
+  [closable]="false"
+  header="AI Assistant"
+  styleClass="ai-chat-dialog theme-aware-dialog"
+  [ngClass]="{'minimized': minimized}"
+  [baseZIndex]="1000">
+  
+  <ng-template pTemplate="header">
+    <div class="flex justify-content-between align-items-center w-full">
+      <span class="font-bold">AI Assistant</span>
+      <div class="header-buttons">
+        <button type="button" *ngIf="!minimized" pButton icon="pi pi-minus" (click)="minimizeChat()" class="p-button-text p-button-sm header-button" aria-label="Minimize"></button>
+        <button type="button" *ngIf="minimized" pButton icon="pi pi-window-maximize" (click)="maximizeChat()" class="p-button-text p-button-sm header-button" aria-label="Maximize"></button>
+        <button type="button" pButton icon="pi pi-times" (click)="closeChat()" class="p-button-text p-button-sm header-button close-button" aria-label="Close"></button>
+      </div>
+    </div>
+  </ng-template>
+  
+  <div *ngIf="!minimized" class="chat-content">
+    <!-- Messages Container -->
+    <div class="messages-container" #messageContainer>
+      <!-- Welcome message if no messages -->
+      <div *ngIf="messages.length === 0" class="ai-message">
+        <div class="message-content">
+          <p>Hi! I'm your AI assistant. I can help you analyze your invoice and client data. Try asking me:</p>
+          <div class="example-prompts">
+            <button *ngFor="let prompt of examplePrompts" 
+                    pButton 
+                    label="{{prompt}}" 
+                    class="p-button-text p-button-sm prompt-button"
+                    (click)="useExamplePrompt(prompt)"></button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Message list -->
+      <div *ngFor="let message of messages" [ngClass]="message.isUserMessage ? 'user-message' : 'ai-message'" class="message">
+        <div class="message-content">
+          <div class="message-header">
+            <span class="message-sender">{{ message.isUserMessage ? 'You' : 'AI Assistant' }}</span>
+            <span class="message-time">{{ message.createdAt | date:'shortTime' }}</span>
+          </div>
+          <div class="message-body" [innerHTML]="message.content | formatContent"></div>
+        </div>
+      </div>
+      
+      <!-- Loading indicator -->
+      <div *ngIf="loading" class="ai-message">
+        <div class="message-content">
+          <p-progressSpinner [style]="{width: '25px', height: '25px'}" styleClass="custom-spinner"></p-progressSpinner>
+          <span class="ml-2">Thinking...</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Input Form -->
+    <div class="chat-input">
+      <form [formGroup]="chatForm" (ngSubmit)="sendMessage()">
+        <div class="p-inputgroup">
+          <input type="text" pInputText formControlName="query" placeholder="Ask a question...">
+          <button type="submit" pButton icon="pi pi-send" [disabled]="chatForm.invalid || loading"></button>
+        </div>
+      </form>
+      <div class="chat-actions">
+        <button pButton label="Clear Chat" icon="pi pi-trash" class="p-button-text p-button-sm clear-chat-button" (click)="clearChat()"></button>
+      </div>
+    </div>
+  </div>
+</p-dialog>
