@@ -59,6 +59,7 @@ import { catchError, forkJoin, of } from 'rxjs';
           [change]="overdueChange"
           [subtitle]="dashboardData?.unpaidInvoicesCount + ' unpaid invoices'"
           [loading]="loading"
+          [negative]="true"
         ></app-kpi-card>
         
         <app-kpi-card

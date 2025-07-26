@@ -32,9 +32,12 @@ import { CardComponent } from '../card/card.component';
           
           <!-- Change and subtitle -->
           <div class="flex items-center mt-1">
-            <span *ngIf="change !== undefined" class="text-sm font-semibold mr-2" [class.positive-change]="change > 0" [class.negative-change]="change < 0" [class.neutral-change]="change === 0">
-              <i *ngIf="change > 0" class="pi pi-arrow-up mr-1"></i>
-              <i *ngIf="change < 0" class="pi pi-arrow-down mr-1"></i>
+            <span *ngIf="change !== undefined" class="text-sm font-semibold mr-2"
+              [class.positive-change]="isPositiveChange()"
+              [class.negative-change]="isNegativeChange()"
+              [class.neutral-change]="change === 0">
+              <i *ngIf="isArrowUp()" class="pi pi-arrow-up mr-1"></i>
+              <i *ngIf="isArrowDown()" class="pi pi-arrow-down mr-1"></i>
               {{ change > 0 ? '+' : '' }}{{ change | number:'1.1-1' }}%
             </span>
             <p *ngIf="subtitle" class="text-sm text-gray-500 dark:text-gray-300">{{ subtitle }}</p>
@@ -114,4 +117,25 @@ export class KpiCardComponent {
   @Input() change?: number; // Percentage change (up or down)
   @Input() subtitle = '';
   @Input() loading = false;
-} 
+  @Input() negative = false; // If true, increase is bad (red/down)
+
+  isPositiveChange(): boolean {
+    if (this.change === 0 || this.change === undefined) return false;
+    return this.negative ? this.change < 0 : this.change > 0;
+  }
+
+  isNegativeChange(): boolean {
+    if (this.change === 0 || this.change === undefined) return false;
+    return this.negative ? this.change > 0 : this.change < 0;
+  }
+
+  isArrowUp(): boolean {
+    if (this.change === 0 || this.change === undefined) return false;
+    return this.negative ? this.change < 0 : this.change > 0;
+  }
+
+  isArrowDown(): boolean {
+    if (this.change === 0 || this.change === undefined) return false;
+    return this.negative ? this.change > 0 : this.change < 0;
+  }
+}

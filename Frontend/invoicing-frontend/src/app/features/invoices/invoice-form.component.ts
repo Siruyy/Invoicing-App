@@ -1080,8 +1080,12 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
       return;
     }
     this.saving = true;
+    // Set status to PENDING unless already PAID or CANCELLED
+    const currentStatus = this.invoiceForm.get('status')?.value;
+    if (currentStatus !== InvoiceStatus.PAID && currentStatus !== InvoiceStatus.CANCELLED) {
+      this.invoiceForm.get('status')?.setValue(InvoiceStatus.PENDING);
+    }
     const invoiceData = this.prepareFormData();
-    // Use the service methods which will wrap the data in invoiceDto property
     const saveOperation = this.isEditMode && this.invoiceId 
       ? this.invoiceService.updateInvoice(this.invoiceId, invoiceData) 
       : this.invoiceService.createInvoice(invoiceData);
@@ -1095,7 +1099,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
           summary: 'Success',
           detail: this.isEditMode ? 'Invoice updated' : 'Invoice saved'
         });
-        // Navigate to invoice detail view
         setTimeout(() => this.router.navigate(['/invoices', response.id || this.invoiceId]), 500);
       },
       error: (error) => {

@@ -143,8 +143,8 @@ export class InvoiceService {
     const params = new HttpParams()
       .set('page', '1')
       .set('limit', limit.toString())
-      .set('sortBy', 'issueDate')
-      .set('sortOrder', 'desc');
+      .set('sortField', 'issueDate')
+      .set('sortOrder', '-1');
       
     return this.api.get<any>('/invoices', params).pipe(
       map(response => {
