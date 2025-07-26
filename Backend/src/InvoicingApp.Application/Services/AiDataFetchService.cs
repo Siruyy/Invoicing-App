@@ -43,7 +43,7 @@ namespace InvoicingApp.Application.Services
                     // Get all clients
                     var clients = await _clientService.GetAllClientsAsync();
                     
-                    // For each client, get their invoices
+                    // For each client, get their invoices and include all contact details
                     foreach (var client in clients)
                     {
                         var clientInvoices = await _invoiceService.GetInvoicesByClientAsync(client.Id);
@@ -53,6 +53,13 @@ namespace InvoicingApp.Application.Services
                         if (clientInvoicesList.Count == 0) continue;
                         
                         sb.AppendLine($"Client: {client.Name} (ID: {client.Id})");
+                        sb.AppendLine($"  Email: {client.Email}");
+                        sb.AppendLine($"  Phone: {client.Phone}");
+                        sb.AppendLine($"  Address: {client.Address}, {client.City}, {client.State}, {client.ZipCode}, {client.Country}");
+                        sb.AppendLine($"  Company: {client.CompanyName}");
+                        sb.AppendLine($"  Contact Person: {client.ContactPerson}");
+                        sb.AppendLine($"  Tax Number: {client.TaxNumber}");
+                        sb.AppendLine($"  Notes: {client.Notes}");
                         sb.AppendLine($"  Total Invoices: {clientInvoicesList.Count}");
                         
                         // Get invoice item categories and frequencies
@@ -111,8 +118,15 @@ namespace InvoicingApp.Application.Services
                         var overdueInvoices = clientInvoicesList.Count(i => i.DueDate < DateTime.Now && i.Status != InvoiceStatus.Paid);
                         var latePaymentPercentage = clientInvoicesList.Count > 0 ? 
                             (double)overdueInvoices / clientInvoicesList.Count * 100 : 0;
-                            
+                        
                         sb.AppendLine($"Client: {client.Name} (ID: {client.Id})");
+                        sb.AppendLine($"  Email: {client.Email}");
+                        sb.AppendLine($"  Phone: {client.Phone}");
+                        sb.AppendLine($"  Address: {client.Address}, {client.City}, {client.State}, {client.ZipCode}, {client.Country}");
+                        sb.AppendLine($"  Company: {client.CompanyName}");
+                        sb.AppendLine($"  Contact Person: {client.ContactPerson}");
+                        sb.AppendLine($"  Tax Number: {client.TaxNumber}");
+                        sb.AppendLine($"  Notes: {client.Notes}");
                         sb.AppendLine($"  Total Invoices: {clientInvoicesList.Count}");
                         sb.AppendLine($"  Overdue Invoices: {overdueInvoices}");
                         sb.AppendLine($"  Late Payment Rate: {latePaymentPercentage:F1}%");
@@ -130,7 +144,7 @@ namespace InvoicingApp.Application.Services
                                     Value = g.Sum(i => i.TotalAmount)
                                 })
                                 .ToList();
-                                
+                            
                             sb.AppendLine("  Purchase trend by month:");
                             foreach (var month in invoicesByMonth.TakeLast(6))
                             {
@@ -166,14 +180,14 @@ namespace InvoicingApp.Application.Services
                         .OrderByDescending(x => x.TotalSpent)
                         .Take(5)
                         .ToList();
-                        
+                    
                     sb.AppendLine("\nTop Clients by Spending:");
                     foreach (var topClient in topClients)
                     {
                         var client = clients.FirstOrDefault(c => c.Id == topClient.ClientId);
                         if (client != null)
                         {
-                            sb.AppendLine($"  - {client.Name}: ${topClient.TotalSpent:F2}");
+                            sb.AppendLine($"  - {client.Name} (ID: {client.Id}), Email: {client.Email}, Phone: {client.Phone}, Company: {client.CompanyName}, Total Spent: ${topClient.TotalSpent:F2}");
                         }
                     }
                     
@@ -184,7 +198,7 @@ namespace InvoicingApp.Application.Services
                         .Select(g => new { Item = g.Key, Count = g.Count() })
                         .OrderByDescending(x => x.Count)
                         .Take(5);
-                        
+                    
                     sb.AppendLine("\nMost Common Invoice Items:");
                     foreach (var item in topItems)
                     {
