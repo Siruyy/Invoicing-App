@@ -227,7 +227,11 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
             });
           },
           error: (error) => {
-            console.error('Error loading pre-selected client', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Could not load client information'
+            });
           }
         });
       }
@@ -408,41 +412,28 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
     }
   }
   
-  // Toggle payment status
+  // Toggle payment status from InputSwitch control
   onPaymentStatusChange(event: any): void {
-    const isPaid = event.checked;
-    const status = isPaid ? InvoiceStatus.PAID : 
-                  (this.isOverdue() ? InvoiceStatus.OVERDUE : InvoiceStatus.PENDING);
-    const paidAt = isPaid ? new Date() : null;
-    
-    this.invoiceForm.patchValue({ 
-      status, 
-      paidAt
-    });
+    this.isPaid = event.checked;
+    this.togglePaymentStatus();
   }
   
   // Toggle payment status with button
   togglePaymentStatus(): void {
-    this.isPaid = !this.isPaid;
+    // Update status based on isPaid flag
     const status = this.isPaid ? InvoiceStatus.PAID : 
                   (this.isOverdue() ? InvoiceStatus.OVERDUE : InvoiceStatus.PENDING);
     const paidAt = this.isPaid ? new Date() : null;
     
-    // Temporarily disable valueChanges to prevent autosave
-    const subscription = this.invoiceForm.valueChanges.subscribe();
-    subscription.unsubscribe();
-    
+    // Update form without triggering valueChanges
     this.invoiceForm.patchValue({ 
       status, 
       paidAt
-    }, { emitEvent: false }); // Add emitEvent: false to prevent valueChanges event
-    
-    console.log('Marking invoice as:', this.isPaid ? 'PAID' : 'NOT PAID');
+    }, { emitEvent: false });
     
     if (this.invoiceId) {
       this.saving = true;
       
-      // Always use updateInvoiceStatus instead of markAsPaid which doesn't exist
       this.invoiceService.updateInvoiceStatus(this.invoiceId, status).pipe(
         takeUntil(this.destroy$)
       ).subscribe({
@@ -454,7 +445,7 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
             this.invoiceForm.patchValue({ 
               status: response.status,
               paidAt: response.paidAt ? new Date(response.paidAt) : null
-            });
+            }, { emitEvent: false });
           }
           
           this.messageService.add({
@@ -464,14 +455,9 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
           });
         },
         error: (error) => {
-          console.error('Failed to update invoice status', error);
           this.saving = false;
           this.isPaid = !this.isPaid; // Revert the toggle if the API call fails
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Update Failed',
-            detail: 'Failed to update invoice status'
-          });
+          this.handleSaveError(error, 'Failed to update invoice status');
         }
       });
     }
@@ -534,7 +520,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Error loading clients', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -554,7 +539,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
         this.setupAutosave();
       },
       error: (error) => {
-        console.error('Error loading invoice', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -584,8 +568,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
     this.invoiceForm.patchValue({
       invoiceNumber: invoice.invoiceNumber,
       clientId: invoice.clientId || (invoice.client as Client).id,
-      companyName: invoice.companyName || '',
-      companyAddress: invoice.companyAddress || '',
       issueDate: issueDate,
       dueDate: dueDate,
       taxRate: invoice.taxAmount && invoice.subtotal 
@@ -594,12 +576,53 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
       notes: invoice.notes || '',
       subtotal: invoice.subtotal || 0,
       taxAmount: invoice.taxAmount || 0,
-      totalAmount: invoice.total || 0,
+      totalAmount: invoice.totalAmount || 0,
       status: invoice.status || InvoiceStatus.DRAFT,
       paidAt: invoice.paidAt ? new Date(invoice.paidAt) : null,
       currency: invoice.currency || 'USD',
       exchangeRate: invoice.exchangeRate || 1
     });
+
+    // If companyName and companyAddress are empty or not provided,
+    // try to populate them from the client information
+    if (typeof invoice.client === 'object' && invoice.client) {
+      const selectedClient = invoice.client as Client;
+      let formattedAddress = '';
+      
+      if (typeof selectedClient.address === 'object' && selectedClient.address) {
+        const address = selectedClient.address;
+        // Format as: street, city, state zipCode, country
+        formattedAddress = [
+          address.street,
+          [address.city, address.state, address.zipCode].filter(Boolean).join(' '),
+          address.country
+        ].filter(Boolean).join(', ');
+      } else if (selectedClient.address) {
+        formattedAddress = selectedClient.address;
+      } else {
+        // Try to construct from individual fields if available
+        const addressParts = [
+          selectedClient.address,
+          [selectedClient.city, selectedClient.state, selectedClient.zipCode].filter(Boolean).join(' '),
+          selectedClient.country
+        ].filter(Boolean);
+        
+        if (addressParts.length > 0) {
+          formattedAddress = addressParts.join(', ');
+        }
+      }
+      
+      this.invoiceForm.patchValue({
+        companyName: invoice.companyName || selectedClient.companyName || selectedClient.name || '',
+        companyAddress: invoice.companyAddress || formattedAddress || ''
+      });
+    } else {
+      // If no client object is available, use whatever was in the invoice
+      this.invoiceForm.patchValue({
+        companyName: invoice.companyName || '',
+        companyAddress: invoice.companyAddress || ''
+      });
+    }
     
     // Set the paid status flag
     this.isPaid = invoice.status === InvoiceStatus.PAID;
@@ -641,9 +664,13 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
         this.invoiceForm.patchValue({ invoiceNumber });
       },
       error: (err: any) => {
-        console.error('Error generating invoice number', err);
         const fallbackNumber = `INV-${new Date().getTime()}`;
         this.invoiceForm.patchValue({ invoiceNumber: fallbackNumber });
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Invoice Number',
+          detail: 'Using generated fallback invoice number'
+        });
       }
     });
   }
@@ -658,7 +685,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
       // Skip autosave if the invoice is in a finalized state (Paid or Cancelled)
       const currentStatus = this.invoiceForm.get('status')?.value;
       if (currentStatus === InvoiceStatus.PAID || currentStatus === InvoiceStatus.CANCELLED) {
-        console.log('Skipping autosave for finalized invoice');
         return;
       }
       this.autosave();
@@ -680,7 +706,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
     // Skip autosave if the invoice is in a finalized state (Paid or Cancelled)
     const currentStatus = this.invoiceForm.get('status')?.value;
     if (this.isEditMode && this.invoiceId && (currentStatus === InvoiceStatus.PAID || currentStatus === InvoiceStatus.CANCELLED)) {
-      console.log('Skipping autosave for finalized invoice');
       return;
     }
     
@@ -691,17 +716,19 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
     try {
       invoiceData = this.prepareFormData();
     } catch (err) {
-      console.error('Failed to prepare form data:', err);
       this.autoSaving = false;
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Autosave Error',
+        detail: 'Failed to prepare form data for autosave'
+      });
       return;
     }
     
     // For new invoices, set status to Draft explicitly
     if (!this.isEditMode || !this.invoiceId) {
-      invoiceData.status = InvoiceStatus.DRAFT; // Use the enum instead of numeric value
+      invoiceData.status = InvoiceStatus.DRAFT;
     }
-    
-    console.log('Autosave data:', invoiceData);
     
     // Save as draft - use the service methods which wrap the data in invoiceDto property
     const saveOperation = this.isEditMode && this.invoiceId 
@@ -717,7 +744,7 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
           
           // Safety check for response
           if (!response) {
-            console.warn('Empty response from saveOperation in autosave');
+            // Empty response from save operation, nothing to do
             return;
           }
           
@@ -732,8 +759,8 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('Autosave failed', error);
           this.autoSaving = false;
+          // Silent fail for autosave - we don't want to disrupt the user
         },
         complete: () => {
           this.autoSaving = false;
@@ -758,7 +785,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
     
     // Set the status explicitly to Draft
     invoiceData.status = InvoiceStatus.DRAFT;
-    console.log('Save as draft data:', invoiceData);
     
     // Use the service methods which will wrap the data in invoiceDto property
     const saveOperation = this.isEditMode && this.invoiceId 
@@ -780,13 +806,7 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
         setTimeout(() => this.router.navigate(['/invoices', response.id || this.invoiceId]), 500);
       },
       error: (error) => {
-        console.error('Error saving draft', error);
-        this.saving = false;
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to save draft. Please try again.'
-        });
+        this.handleSaveError(error, 'Failed to save draft. Please try again.');
       }
     });
   }
@@ -818,8 +838,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
   
   // Helper method to send email directly without updating invoice
   private sendDirectEmail(invoiceId: number): void {
-    console.log('Sending direct email for invoice ID:', invoiceId);
-    
     this.invoiceService.sendInvoiceEmail(invoiceId, this.clientEmail).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
@@ -835,7 +853,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
         setTimeout(() => this.router.navigate(['/invoices']), 500);
       },
       error: (error) => {
-        console.error('Error sending email', error);
         this.saving = false;
         this.messageService.add({
           severity: 'warn',
@@ -858,7 +875,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
     
     // If the invoice is already finalized, skip the update and just send the email
     if (this.isEditMode && this.invoiceId && isFinalized) {
-      console.log('Invoice is already finalized, sending email with current status');
       this.sendDirectEmail(this.invoiceId);
       return;
     }
@@ -871,7 +887,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
       if (!isFinalized && this.invoiceForm.get('status')?.value !== InvoiceStatus.PAID) {
         invoiceData.status = InvoiceStatus.PENDING;
       }
-      console.log('Send invoice data:', invoiceData);
       
       // Use the service methods to send data directly to the backend
       const saveOperation = this.isEditMode && this.invoiceId 
@@ -883,13 +898,10 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
       ).subscribe({
         next: (response) => {
           // Ensure we have a valid invoice ID
-          console.log('Save response:', response);
-          
           // Get invoice ID either from the response or use the existing one
           const invoiceId = response && response.id ? response.id : this.invoiceId;
           
           if (!invoiceId) {
-            console.error('No invoice ID available for email sending');
             this.saving = false;
             this.messageService.add({
               severity: 'error',
@@ -898,8 +910,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
             });
             return;
           }
-          
-          console.log('Using invoice ID for email:', invoiceId);
           
           // Send email with invoice PDF
           this.invoiceService.sendInvoiceEmail(invoiceId, this.clientEmail).pipe(
@@ -917,7 +927,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
               setTimeout(() => this.router.navigate(['/invoices']), 500);
             },
             error: (error) => {
-              console.error('Error sending email', error);
               this.saving = false;
               this.messageService.add({
                 severity: 'warn',
@@ -930,13 +939,7 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
           });
         },
         error: (error) => {
-          console.error('Error saving invoice', error);
-          this.saving = false;
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to save invoice. Please try again.'
-          });
+          this.handleSaveError(error, 'Failed to save invoice. Please try again.');
         }
       });
     } catch (error) {
@@ -953,10 +956,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
   // Helper to prepare form data for submission
   private prepareFormData(): any {
     const formValue = this.invoiceForm.value;
-    
-    // Debug the clientId and status
-    console.log('Client ID from form:', formValue.clientId);
-    console.log('Status from form:', formValue.status);
     
     // Ensure clientId is a number and not null
     const clientId = Number(formValue.clientId);
@@ -1053,7 +1052,6 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
           });
         },
         error: (error: any) => {
-          console.error('Error downloading PDF', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
@@ -1061,5 +1059,16 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
           });
         }
       });
+  }
+  
+  // Helper method to handle save errors consistently
+  private handleSaveError(error: any, message: string = 'Failed to save invoice'): void {
+    console.error('Save error:', error);
+    this.saving = false;
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: message
+    });
   }
 } 
