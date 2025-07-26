@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("InvoicingApp.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6882fbe359947be27b700be3cf2238c4b79ebbf1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+00da1027d4cd436fb519e820156315bc157c5a97")]
 [assembly: System.Reflection.AssemblyProductAttribute("InvoicingApp.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("InvoicingApp.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

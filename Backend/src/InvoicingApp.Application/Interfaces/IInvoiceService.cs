@@ -13,7 +13,9 @@ namespace InvoicingApp.Application.Interfaces
             DateTime? startDate = null, 
             DateTime? endDate = null, 
             string? search = null, 
-            bool includeDrafts = false);
+            bool includeDrafts = false,
+            string sortField = null,
+            int? sortOrder = null);
         Task<InvoiceDto?> GetInvoiceByIdAsync(int id);
         Task<IEnumerable<InvoiceDto>> GetInvoicesByClientAsync(int clientId);
         Task<IEnumerable<InvoiceDto>> GetInvoicesByStatusAsync(InvoiceStatus status);

@@ -34,7 +34,9 @@ namespace InvoicingApp.Application.Services
             DateTime? startDate = null, 
             DateTime? endDate = null, 
             string? search = null, 
-            bool includeDrafts = false)
+            bool includeDrafts = false,
+            string sortField = null,
+            int? sortOrder = null)
         {
             // Get all invoices with client data
             var allInvoices = await _invoiceRepository.GetAllInvoicesWithClientsAsync();
@@ -72,6 +74,53 @@ namespace InvoicingApp.Application.Services
                 filteredInvoices = filteredInvoices.Where(i => 
                     i.InvoiceNumber.ToLower().Contains(search) ||
                     (i.Client != null && i.Client.Name.ToLower().Contains(search)));
+            }
+
+            // Sorting (case-insensitive, robust)
+            if (!string.IsNullOrEmpty(sortField))
+            {
+                string field = sortField.Trim().ToLowerInvariant();
+                bool descending = sortOrder.HasValue ? sortOrder.Value == -1 : true;
+                switch (field)
+                {
+                    case "invoicenumber":
+                    case "invoice_number":
+                        filteredInvoices = descending ? filteredInvoices.OrderByDescending(i => i.InvoiceNumber) : filteredInvoices.OrderBy(i => i.InvoiceNumber);
+                        break;
+                    case "client.name":
+                    case "clientname":
+                    case "client_name":
+                        filteredInvoices = descending ? filteredInvoices.OrderByDescending(i => i.Client.Name) : filteredInvoices.OrderBy(i => i.Client.Name);
+                        break;
+                    case "issuedate":
+                    case "issue_date":
+                        filteredInvoices = descending ? filteredInvoices.OrderByDescending(i => i.IssueDate) : filteredInvoices.OrderBy(i => i.IssueDate);
+                        break;
+                    case "duedate":
+                    case "due_date":
+                        filteredInvoices = descending ? filteredInvoices.OrderByDescending(i => i.DueDate) : filteredInvoices.OrderBy(i => i.DueDate);
+                        break;
+                    case "status":
+                        filteredInvoices = descending ? filteredInvoices.OrderByDescending(i => i.Status) : filteredInvoices.OrderBy(i => i.Status);
+                        break;
+                    case "totalamount":
+                    case "total":
+                        filteredInvoices = descending ? filteredInvoices.OrderByDescending(i => i.TotalAmount) : filteredInvoices.OrderBy(i => i.TotalAmount);
+                        break;
+                    case "createdat":
+                    case "created_at":
+                        filteredInvoices = descending ? filteredInvoices.OrderByDescending(i => i.CreatedAt) : filteredInvoices.OrderBy(i => i.CreatedAt);
+                        break;
+                    default:
+                        // Fallback to createdAt
+                        filteredInvoices = filteredInvoices.OrderByDescending(i => i.CreatedAt);
+                        break;
+                }
+            }
+            else
+            {
+                // Default: newest first
+                filteredInvoices = filteredInvoices.OrderByDescending(i => i.CreatedAt);
             }
             
             // Count total results after filtering but before pagination

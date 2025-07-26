@@ -420,43 +420,40 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
   
   // Toggle payment status with button
   togglePaymentStatus(): void {
-    // Update status based on isPaid flag
-    const status = this.isPaid ? InvoiceStatus.PAID : 
-                  (this.isOverdue() ? InvoiceStatus.OVERDUE : InvoiceStatus.PENDING);
-    const paidAt = this.isPaid ? new Date() : null;
-    
-    // Update form without triggering valueChanges
-    this.invoiceForm.patchValue({ 
-      status, 
+    // Always set status to PAID when clicking the Paid button
+    const status = InvoiceStatus.PAID;
+    const paidAt = new Date();
+
+    this.invoiceForm.patchValue({
+      status,
       paidAt
     }, { emitEvent: false });
-    
+
     if (this.invoiceId) {
       this.saving = true;
-      
       this.invoiceService.updateInvoiceStatus(this.invoiceId, status).pipe(
         takeUntil(this.destroy$)
       ).subscribe({
         next: (response) => {
           this.saving = false;
-          
-          // Make sure the status in the form matches the response
           if (response && response.status) {
-            this.invoiceForm.patchValue({ 
+            this.invoiceForm.patchValue({
               status: response.status,
               paidAt: response.paidAt ? new Date(response.paidAt) : null
             }, { emitEvent: false });
+            this.isPaid = response.status === InvoiceStatus.PAID;
+          } else {
+            this.isPaid = true;
           }
-          
           this.messageService.add({
             severity: 'success',
             summary: 'Status Updated',
-            detail: this.isPaid ? 'Invoice marked as paid' : 'Invoice marked as unpaid'
+            detail: 'Invoice marked as paid'
           });
         },
         error: (error) => {
           this.saving = false;
-          this.isPaid = !this.isPaid; // Revert the toggle if the API call fails
+          this.isPaid = false; // Revert to unpaid if the API call fails
           this.handleSaveError(error, 'Failed to update invoice status');
         }
       });
@@ -1071,4 +1068,39 @@ export class InvoiceFormComponent implements OnInit, OnDestroy {
       detail: message
     });
   }
-} 
+
+  saveOnly(): void {
+    if (!this.invoiceForm.valid) {
+      this.markFormGroupTouched(this.invoiceForm);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Validation Error',
+        detail: 'Please fill all required fields'
+      });
+      return;
+    }
+    this.saving = true;
+    const invoiceData = this.prepareFormData();
+    // Use the service methods which will wrap the data in invoiceDto property
+    const saveOperation = this.isEditMode && this.invoiceId 
+      ? this.invoiceService.updateInvoice(this.invoiceId, invoiceData) 
+      : this.invoiceService.createInvoice(invoiceData);
+    saveOperation.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (response) => {
+        this.saving = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: this.isEditMode ? 'Invoice updated' : 'Invoice saved'
+        });
+        // Navigate to invoice detail view
+        setTimeout(() => this.router.navigate(['/invoices', response.id || this.invoiceId]), 500);
+      },
+      error: (error) => {
+        this.handleSaveError(error, 'Failed to save invoice. Please try again.');
+      }
+    });
+  }
+}

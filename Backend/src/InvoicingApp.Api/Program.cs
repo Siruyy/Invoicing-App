@@ -19,6 +19,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Register infrastructure services
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
+// Register CompanySettings for DI (for QuestPdfService and others)
+builder.Services.Configure<InvoicingApp.Core.Settings.CompanySettings>(
+    builder.Configuration.GetSection("CompanySettings"));
+
 // Register application services
 builder.Services.AddApplicationServices();
 

@@ -49,10 +49,18 @@
         <button 
           pButton 
           type="button" 
+          label="Send" 
+          class="p-button-primary send-btn" 
+          [loading]="saving"
+          (click)="saveAndSend()">
+        </button>
+        <button 
+          pButton 
+          type="button" 
           [label]="isEditMode ? 'Update' : 'Save'" 
           class="p-button-success save-btn" 
           [loading]="saving"
-          (click)="saveAndSend()">
+          (click)="saveOnly()">
         </button>
         <button *ngIf="isEditMode && invoiceId" 
                 pButton 

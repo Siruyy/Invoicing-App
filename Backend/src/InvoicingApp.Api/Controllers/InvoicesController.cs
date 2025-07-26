@@ -28,7 +28,9 @@ namespace InvoicingApp.Api.Controllers
             [FromQuery] DateTime? startDate = null,
             [FromQuery] DateTime? endDate = null,
             [FromQuery] string search = null,
-            [FromQuery] bool includeDrafts = false)
+            [FromQuery] bool includeDrafts = false,
+            [FromQuery] string sortField = null,
+            [FromQuery] int? sortOrder = null)
         {
             // Get filtered invoices with pagination
             var result = await _invoiceService.GetFilteredInvoicesAsync(
@@ -38,7 +40,9 @@ namespace InvoicingApp.Api.Controllers
                 startDate, 
                 endDate, 
                 search, 
-                includeDrafts);
+                includeDrafts,
+                sortField,
+                sortOrder);
             
             // Log information about the invoices for debugging
             foreach (var invoice in result.Items)

@@ -11,31 +11,43 @@ import { HttpParams } from '@angular/common/http';
 export class InvoiceService {
   constructor(private api: ApiService) { }
 
-  getInvoices(page: number = 1, limit: number = 10, status?: InvoiceStatus, clientId?: number, search?: string, includeDrafts: boolean = true, startDate?: Date, endDate?: Date): Observable<{ items: Invoice[], total: number }> {
+  getInvoices(
+    page: number = 1,
+    limit: number = 10,
+    status?: InvoiceStatus,
+    clientId?: number,
+    search?: string,
+    includeDrafts: boolean = true,
+    startDate?: Date,
+    endDate?: Date,
+    sortField?: string,
+    sortOrder?: number
+  ): Observable<{ items: Invoice[], total: number }> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('limit', limit.toString())
       .set('includeDrafts', includeDrafts.toString());
-    
+
     if (status) {
-      // Map the status to numeric value for the backend
       params = params.set('status', this.mapStatusToBackend(status).toString());
     }
-    
     if (clientId) {
       params = params.set('clientId', clientId.toString());
     }
-    
     if (search) {
       params = params.set('search', search);
     }
-    
     if (startDate) {
       params = params.set('startDate', startDate.toISOString());
     }
-    
     if (endDate) {
       params = params.set('endDate', endDate.toISOString());
+    }
+    if (sortField) {
+      params = params.set('sortField', sortField);
+    }
+    if (typeof sortOrder === 'number') {
+      params = params.set('sortOrder', sortOrder.toString());
     }
     
     return this.api.get<any>('/invoices', params).pipe(

@@ -53,7 +53,7 @@ import { InvoiceService } from '../../core/services/invoice.service';
 export class InvoiceListComponent implements OnInit {
   invoices: Invoice[] = [];
   loading = true;
-  
+
   // Import/Export related properties
   showImportDialog: boolean = false;
   uploadedFile: File | null = null;
@@ -64,6 +64,10 @@ export class InvoiceListComponent implements OnInit {
   startDateFilter: Date | null = null;
   endDateFilter: Date | null = null;
   globalSearch = '';
+
+  // sorting state
+  sortField: string = 'createdAt'; // default to createdAt for newest first
+  sortOrder: number = -1; // -1 = DESC, 1 = ASC
 
   statusOptions = [
     { label: 'All Statuses', value: null },
@@ -91,26 +95,29 @@ export class InvoiceListComponent implements OnInit {
     this.currentPage = 1;
     this.loadInvoices();
   }
-  
+
   loadInvoices(): void {
     this.loading = true;
-    
+
     // Ensure we have valid values
     const page = isNaN(this.currentPage) ? 1 : this.currentPage;
     const limit = isNaN(this.rowsPerPage) ? 10 : this.rowsPerPage;
-    
+
     // Make sure first is in sync with currentPage
     this.first = (page - 1) * limit;
-    
+
+    // Pass sortField and sortOrder to the service if supported
     this.invoiceService.getInvoices(
       page,
       limit,
       this.statusFilter || undefined,
-      undefined,
+      undefined, // clientId
       this.globalSearch || undefined,
       true, // include draft invoices
       this.startDateFilter || undefined,
-      this.endDateFilter || undefined
+      this.endDateFilter || undefined,
+      this.sortField,
+      this.sortOrder
     ).subscribe({
       next: (response) => {
         this.invoices = response.items;
@@ -127,6 +134,14 @@ export class InvoiceListComponent implements OnInit {
         });
       }
     });
+  }
+
+  onSort(event: any): void {
+    this.sortField = event.field;
+    this.sortOrder = event.order;
+    this.currentPage = 1;
+    this.first = 0;
+    this.loadInvoices();
   }
 
   // Removed the goTo method as we no longer want clicking the row to navigate
