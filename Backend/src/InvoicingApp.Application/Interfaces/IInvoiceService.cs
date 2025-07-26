@@ -26,5 +26,9 @@ namespace InvoicingApp.Application.Interfaces
         Task<string> GenerateInvoiceNumberAsync();
         Task<InvoiceDto?> SaveDraftAsync(CreateInvoiceDto invoiceDto);
         Task<InvoiceDto?> GetDraftByIdAsync(int id);
+        
+        // CSV Import/Export methods
+        Task<byte[]> ExportInvoicesToCsvAsync(IEnumerable<int> invoiceIds);
+        Task<int> ImportInvoicesFromCsvAsync(Stream csvStream);
     }
 } 

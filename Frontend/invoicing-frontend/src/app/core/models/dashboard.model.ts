@@ -38,9 +38,18 @@ export interface ClientRevenue {
 }
 
 export interface DashboardData {
-  stats: DashboardStats;
-  recentInvoices: InvoiceSummary[];
+  totalRevenue: number;
+  overdueAmount: number;
+  paidInvoicesCount: number;
+  unpaidInvoicesCount: number;
+  overdueInvoicesCount: number;
+  clientsCount: number;
+  // Trend metrics (percentage change compared to previous period)
+  revenueChange: number;
+  overdueAmountChange: number;
+  invoicesCreatedChange: number;
+  averageValueChange: number;
+  averageInvoiceValue: number;
   monthlyRevenue: MonthlyRevenue[];
-  statusDistribution: StatusDistribution[];
-  topClients: ClientRevenue[];
+  statusBreakdown: StatusDistribution[];
 } 

@@ -6,6 +6,9 @@ import { routes } from './app.routes';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
+// Auth
+import { authInterceptorProvider } from './core/interceptors/auth.interceptor';
+
 // NgRx
 import { provideStore, MetaReducer, ActionReducerMap } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
@@ -15,13 +18,11 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 // Root state interface
 export interface AppState {
   router: any;
-  // Add other state slices here
 }
 
 // Root reducers
 const reducers: ActionReducerMap<AppState> = {
   router: routerReducer
-  // Add other reducers here
 };
 
 // Meta-reducers
@@ -41,6 +42,9 @@ export const appConfig: ApplicationConfig = {
     CurrencyPipe, 
     DecimalPipe,
     PercentPipe,
+    
+    // Auth interceptor
+    authInterceptorProvider,
     
     // NgRx
     provideStore(reducers, { 

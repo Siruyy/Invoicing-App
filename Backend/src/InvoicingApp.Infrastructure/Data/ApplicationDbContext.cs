@@ -12,6 +12,8 @@ namespace InvoicingApp.Infrastructure.Data
         public DbSet<Client> Clients { get; set; } = null!;
         public DbSet<Invoice> Invoices { get; set; } = null!;
         public DbSet<InvoiceItem> InvoiceItems { get; set; } = null!;
+        public DbSet<AiChatMessage> AiChatMessages { get; set; } = null!;
+        public DbSet<User> Users { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -82,6 +84,31 @@ namespace InvoicingApp.Infrastructure.Data
                     .WithMany(i => i.Items)
                     .HasForeignKey(e => e.InvoiceId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+            
+            // AiChatMessage configuration
+            modelBuilder.Entity<AiChatMessage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.UserId).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Content).IsRequired();
+                entity.Property(e => e.IsUserMessage).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
+                
+                entity.HasIndex(e => e.UserId); // Index for faster queries by user
+            });
+            
+            // User configuration
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Username).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.PasswordHash).IsRequired();
+                entity.Property(e => e.Salt).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
+                entity.Property(e => e.LastLoginAt).IsRequired(false);
+                
+                entity.HasIndex(e => e.Username).IsUnique(); // Ensure unique usernames
             });
         }
     }

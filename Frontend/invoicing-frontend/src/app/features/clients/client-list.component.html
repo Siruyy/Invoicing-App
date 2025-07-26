@@ -2,7 +2,11 @@
   <div class="client-list-container">
     <div class="header-row">
       <h1 class="title">Clients</h1>
-      <button pButton type="button" label="Add Client" class="green-btn" routerLink="/clients/new"></button>
+      <div class="button-group">
+        <button pButton type="button" label="Export All Clients" class="blue-btn mr-2" (click)="openExportDialog()"></button>
+        <button pButton type="button" label="Import Client" class="orange-btn mr-2" (click)="openImportDialog()"></button>
+        <button pButton type="button" label="Add Client" class="green-btn" routerLink="/clients/new"></button>
+      </div>
     </div>
     
     <!-- Search bar -->
@@ -100,4 +104,40 @@
   <!-- Confirmation dialog and toast -->
   <p-confirmDialog></p-confirmDialog>
   <p-toast></p-toast>
+
+  <!-- Import Dialog -->
+  <p-dialog 
+    header="Import Clients" 
+    [(visible)]="showImportDialog" 
+    [modal]="true" 
+    [style]="{width: '450px'}" 
+    [closable]="true"
+    [closeOnEscape]="true"
+    [dismissableMask]="true">
+    <div class="p-fluid">
+      <div class="p-field">
+        <label for="file">CSV File</label>
+        <p-fileUpload 
+          name="file" 
+          accept=".csv" 
+          [maxFileSize]="1000000" 
+          [showUploadButton]="false" 
+          [showCancelButton]="false"
+          chooseLabel="Select CSV File"
+          (onSelect)="onFileSelected($event)">
+        </p-fileUpload>
+        <small class="p-error" *ngIf="uploadedFile">Selected file: {{uploadedFile.name}}</small>
+      </div>
+    </div>
+    <div class="import-instructions mt-4">
+      <p><strong>Note:</strong> CSV file should have the following headers:</p>
+      <p class="text-sm text-muted">name, email, phone, address, city, state, zipCode, country, companyName, contactPerson, taxNumber, notes</p>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Cancel" class="p-button-text" (click)="closeImportDialog()"></button>
+      <button pButton type="button" label="Import" class="p-button-primary" (click)="importClients()" [disabled]="!uploadedFile || importInProgress"></button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Export Dialog removed - now we export all clients directly -->
 </app-card> 

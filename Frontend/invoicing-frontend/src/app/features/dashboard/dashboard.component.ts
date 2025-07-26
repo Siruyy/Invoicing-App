@@ -7,6 +7,11 @@ import { CardComponent } from '../../shared/components/card/card.component';
 import { KpiCardComponent } from '../../shared/components/kpi-card/kpi-card.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 
+// Services
+import { DashboardService } from '../../core/services/dashboard.service';
+import { InvoiceService } from '../../core/services/invoice.service';
+import { catchError, forkJoin, of } from 'rxjs';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -38,63 +43,104 @@ import { ButtonComponent } from '../../shared/components/button/button.component
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <app-kpi-card
           title="Total Revenue"
-          [value]="125000"
+          [value]="dashboardData?.totalRevenue ?? 0"
           prefix="$"
           icon="pi-dollar"
-          [change]="8.2"
+          [change]="revenueChange"
           subtitle="Last 30 days"
+          [loading]="loading"
         ></app-kpi-card>
         
         <app-kpi-card
           title="Outstanding Amount"
-          [value]="45750"
+          [value]="dashboardData?.overdueAmount ?? 0"
           prefix="$"
           icon="pi-credit-card"
-          [change]="-2.5"
-          subtitle="10 unpaid invoices"
+          [change]="overdueChange"
+          [subtitle]="dashboardData?.unpaidInvoicesCount + ' unpaid invoices'"
+          [loading]="loading"
         ></app-kpi-card>
         
         <app-kpi-card
           title="Invoices Created"
-          [value]="24"
+          [value]="dashboardData?.paidInvoicesCount + dashboardData?.unpaidInvoicesCount ?? 0"
           icon="pi-file"
-          [change]="12"
+          [change]="invoicesChange"
           subtitle="Last 30 days"
+          [loading]="loading"
         ></app-kpi-card>
         
         <app-kpi-card
           title="Average Value"
-          [value]="5208"
+          [value]="averageInvoiceValue"
           prefix="$"
           format="1.0-0"
           icon="pi-chart-bar"
-          [change]="3.1"
+          [change]="valueChange"
           subtitle="Per invoice"
+          [loading]="loading"
         ></app-kpi-card>
       </div>
       
-      <!-- Placeholder for future chart implementation -->
-      <div class="mb-8">
-        <app-card>
-          <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4 pl-2">Monthly Revenue</h2>
-          <div class="flex items-center justify-center h-64 bg-gray-100 dark:bg-gray-700 rounded-md">
-            <p class="text-gray-500 dark:text-gray-400">Chart will be implemented later</p>
-          </div>
-        </app-card>
-      </div>
       
       <!-- Recent Invoices -->
       <app-card 
         title="Recent Invoices"
         subtitle="Last 5 invoices created"
       >
-        <div class="text-center py-16 text-gray-500 dark:text-gray-400">
-          <p class="mb-4">Invoice history will be displayed here</p>
+        <div *ngIf="loading" class="text-center py-16 text-gray-500 dark:text-gray-400">
+          <p>Loading invoices...</p>
+        </div>
+        <div *ngIf="!loading && (!recentInvoices || recentInvoices.length === 0)" class="text-center py-16 text-gray-500 dark:text-gray-400">
+          <p class="mb-4">No recent invoices found</p>
           <app-button 
-            label="View All Invoices" 
-            variant="secondary"
-            routerLink="/invoices"
+            label="Create New Invoice" 
+            variant="primary"
+            routerLink="/invoices/new"
           ></app-button>
+        </div>
+        <div *ngIf="!loading && recentInvoices && recentInvoices.length > 0">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead>
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Invoice #</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Client</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              <tr *ngFor="let invoice of recentInvoices">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <a [routerLink]="['/invoices', invoice.id]" class="text-blue-600 dark:text-blue-400 hover:underline">
+                    {{ invoice.invoiceNumber }}
+                  </a>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ invoice.clientName }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ invoice.issueDate | date }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ invoice.totalAmount | currency }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span [ngClass]="{
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': invoice.status === 'Paid',
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300': invoice.status === 'Pending',
+                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300': invoice.status === 'Overdue',
+                    'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300': invoice.status === 'Draft',
+                    'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300': invoice.status === 'PartiallyPaid'
+                  }" class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
+                    {{ invoice.status }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="mt-4 text-center">
+            <app-button 
+              label="View All Invoices" 
+              variant="secondary"
+              routerLink="/invoices"
+            ></app-button>
+          </div>
         </div>
       </app-card>
     </div>
@@ -129,9 +175,71 @@ import { ButtonComponent } from '../../shared/components/button/button.component
   `
 })
 export class DashboardComponent implements OnInit {
-  constructor() { }
+  loading = true;
+  dashboardData: any = null;
+  recentInvoices: any[] = [];
+  
+  // For KPI trends
+  revenueChange = 0;
+  overdueChange = 0;
+  invoicesChange = 0;
+  valueChange = 0;
+  averageInvoiceValue = 0;
+
+  constructor(
+    private dashboardService: DashboardService,
+    private invoiceService: InvoiceService
+  ) { }
 
   ngOnInit(): void {
-    // Initialization logic
+    this.fetchDashboardData();
+  }
+
+  fetchDashboardData(): void {
+    this.loading = true;
+    
+    forkJoin({
+      dashboardData: this.dashboardService.getDashboardData()
+        .pipe(catchError(() => of(null))),
+      recentInvoices: this.invoiceService.getRecentInvoices(5)
+        .pipe(catchError(() => of([])))
+    }).subscribe({
+      next: (results) => {
+        this.dashboardData = results.dashboardData;
+        this.recentInvoices = results.recentInvoices;
+        
+        // Calculate derived metrics
+        this.calculateDerivedMetrics();
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading dashboard data', err);
+        this.loading = false;
+      }
+    });
+  }
+
+  calculateDerivedMetrics(): void {
+    // Use the dynamic values from the backend
+    if (this.dashboardData) {
+      console.log('Dashboard data received:', this.dashboardData);
+      
+      // Use backend-provided average invoice value
+      this.averageInvoiceValue = this.dashboardData.averageInvoiceValue || 0;
+      console.log('Average invoice value:', this.averageInvoiceValue);
+      
+      // Use backend-calculated trend values
+      this.revenueChange = this.dashboardData.revenueChange || 0;
+      this.overdueChange = this.dashboardData.overdueAmountChange || 0;  // Negative is better for overdue amounts
+      this.invoicesChange = this.dashboardData.invoicesCreatedChange || 0;
+      this.valueChange = this.dashboardData.averageValueChange || 0;
+      
+      console.log('Trend values:', {
+        revenueChange: this.revenueChange,
+        overdueChange: this.overdueChange,
+        invoicesChange: this.invoicesChange,
+        valueChange: this.valueChange
+      });
+    }
   }
 } 

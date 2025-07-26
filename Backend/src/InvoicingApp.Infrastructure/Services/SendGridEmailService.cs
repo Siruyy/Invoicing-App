@@ -13,7 +13,7 @@ namespace InvoicingApp.Infrastructure.Services
     public class SendGridEmailService : IEmailService
     {
         private readonly ISendGridClient _client;
-        private readonly IPdfService _pdfService;
+        private readonly IInvoiceService _invoiceService;
         private readonly ILogger<SendGridEmailService> _logger;
         private readonly string _senderEmail;
         private readonly string _senderName;
@@ -21,11 +21,11 @@ namespace InvoicingApp.Infrastructure.Services
         public SendGridEmailService(
             IConfiguration configuration, 
             ISendGridClient client, 
-            IPdfService pdfService,
+            IInvoiceService invoiceService,
             ILogger<SendGridEmailService> logger)
         {
             _client = client;
-            _pdfService = pdfService;
+            _invoiceService = invoiceService;
             _logger = logger;
             _senderEmail = configuration["SendGrid:SenderEmail"] ?? "no-reply@yourdomain.com";
             _senderName = configuration["SendGrid:SenderName"] ?? "Invoicing Application";
@@ -82,34 +82,55 @@ namespace InvoicingApp.Infrastructure.Services
             {
                 _logger.LogInformation("Starting to send invoice email for invoice ID {InvoiceId} to {RecipientEmail}", invoiceId, recipientEmail);
                 
-                // Get the invoice details from the controller instead
-                // The controller will use IInvoiceService to get the data and pass it to us
+                // Get the invoice
+                _logger.LogInformation("Retrieving invoice data for ID {InvoiceId}", invoiceId);
+                var invoice = await _invoiceService.GetInvoiceByIdAsync(invoiceId);
                 
-                // We need to receive both the invoice details and the PDF data
-                // To break the circular dependency, we'll get the invoice details from the controller
-                // and receive them here via parameters
+                if (invoice == null)
+                {
+                    _logger.LogError("Invoice not found with ID {InvoiceId}", invoiceId);
+                    return false;
+                }
                 
-                // For now, we'll create a simple email without attachments
-                // In a complete implementation, we would get invoice details and generate
-                // a more detailed email with attachments
+                // Generate the PDF for attachment
+                _logger.LogInformation("Generating PDF for invoice {InvoiceId}", invoiceId);
+                byte[] pdfBytes;
+                
+                try 
+                {
+                    // Use our invoice service to generate the PDF
+                    pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoiceId);
+                    _logger.LogInformation("Successfully generated PDF, size: {Size} bytes", pdfBytes.Length);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to generate PDF for invoice {InvoiceId}: {Message}", invoiceId, ex.Message);
+                    return false;
+                }
+                
+                string clientName = invoice.Client?.Name ?? "Valued Client";
                 
                 string htmlContent = $@"
                 <html>
                 <body>
-                    <p>Dear Valued Client,</p>
-                    <p>Please find attached invoice for your recent services.</p>
-                    <p>Thank you for your business!</p>
-                    <p>Regards,<br/>Your Company Name</p>
+                    <p>Dear {clientName},</p>
+                    <p>Thank you for your business! Please find your invoice #{invoice.InvoiceNumber} attached to this email.</p>
+                    <p>Invoice Amount: ${invoice.TotalAmount:N2}</p>
+                    <p>Due Date: {invoice.DueDate:d}</p>
+                    <p>If you have any questions about this invoice, please don't hesitate to contact us.</p>
+                    <p>Best regards,<br/>{_senderName}</p>
                 </body>
                 </html>";
 
-                // Send the email without attachments for now
-                _logger.LogInformation("Sending email to {RecipientEmail}", recipientEmail);
+                _logger.LogInformation("Sending email to {RecipientEmail} with PDF attachment", recipientEmail);
                 
+                // Send with the attachment
                 return await SendEmailAsync(
                     recipientEmail,
-                    $"Invoice #{invoiceId}",
-                    htmlContent
+                    $"Invoice #{invoice.InvoiceNumber}",
+                    htmlContent,
+                    pdfBytes,
+                    $"Invoice-{invoice.InvoiceNumber}.pdf"
                 );
             }
             catch (Exception ex)

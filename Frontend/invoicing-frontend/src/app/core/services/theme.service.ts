@@ -28,10 +28,6 @@ export class ThemeService {
     // Update state and save preference
     this.darkMode.next(isDarkMode);
     localStorage.setItem('darkMode', String(isDarkMode));
-    
-    // Log for debugging
-    console.log('Theme changed:', isDarkMode ? 'dark' : 'light');
-    console.log('Dark class exists:', document.documentElement.classList.contains('dark'));
   }
   
   private getInitialThemeState(): boolean {

@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -67,12 +68,28 @@ import { ThemeService } from '../../core/services/theme.service';
                    [ngClass]="{'opacity-0': isDarkMode, 'opacity-100': !isDarkMode}"></i>
               </div>
             </button>
-            <button 
-              class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-primary-400 p-2 rounded-full transition-all"
-              aria-label="User profile"
-            >
-              <i class="pi pi-user text-lg"></i>
-            </button>
+            
+            <div class="relative user-menu-container" *ngIf="isLoggedIn">
+              <button 
+                class="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-primary-400 p-2 rounded-full transition-all flex items-center"
+                (click)="toggleUserMenu($event)"
+              >
+                <i class="pi pi-user text-lg mr-1"></i>
+                <span class="text-sm font-medium">{{ username }}</span>
+                <i class="pi pi-chevron-down text-xs ml-1"></i>
+              </button>
+              
+              <div *ngIf="userMenuOpen" class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg z-50 border border-gray-200 dark:border-gray-700">
+                <div class="py-1">
+                  <button 
+                    (click)="logout()"
+                    class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <i class="pi pi-sign-out mr-2"></i> Logout
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -120,16 +137,50 @@ import { ThemeService } from '../../core/services/theme.service';
 })
 export class HeaderComponent implements OnInit {
   isDarkMode = false;
+  isLoggedIn = false;
+  username: string | null = null;
+  userMenuOpen = false;
   
-  constructor(private themeService: ThemeService) {}
+  constructor(
+    private themeService: ThemeService, 
+    private authService: AuthService,
+    private router: Router
+  ) {}
   
-  ngOnInit() {
-    this.themeService.darkMode$.subscribe(isDarkMode => {
-      this.isDarkMode = isDarkMode;
+  ngOnInit(): void {
+    this.themeService.darkMode$.subscribe(isDark => {
+      this.isDarkMode = isDark;
+    });
+    
+    // Subscribe to auth state
+    this.authService.currentUser$.subscribe(username => {
+      this.isLoggedIn = !!username;
+      this.username = username;
+    });
+    
+    // Close user menu when clicking outside
+    document.addEventListener('click', (event: MouseEvent) => {
+      // Only close if the menu is open and the click is outside the menu button
+      if (this.userMenuOpen && !(event.target as HTMLElement).closest('.user-menu-container')) {
+        this.userMenuOpen = false;
+      }
     });
   }
   
-  toggleDarkMode() {
+  toggleDarkMode(): void {
     this.themeService.toggleDarkMode();
+  }
+  
+  toggleUserMenu(event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.userMenuOpen = !this.userMenuOpen;
+  }
+  
+  logout(): void {
+    this.authService.logout();
+    this.userMenuOpen = false;
+    this.router.navigate(['/login']);
   }
 } 

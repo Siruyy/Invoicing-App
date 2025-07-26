@@ -8,7 +8,14 @@ import { CardComponent } from '../card/card.component';
   imports: [CommonModule, CardComponent],
   template: `
     <app-card>
-      <div class="bg-transparent dark:bg-transparent kpi-card-content">
+      <div *ngIf="loading" class="flex items-center justify-center h-full">
+        <div class="animate-pulse">
+          <div class="h-4 bg-gray-200 dark:bg-gray-700 w-20 mb-4 rounded"></div>
+          <div class="h-8 bg-gray-200 dark:bg-gray-700 w-32 mb-2 rounded"></div>
+          <div class="h-3 bg-gray-200 dark:bg-gray-700 w-24 rounded"></div>
+        </div>
+      </div>
+      <div *ngIf="!loading" class="bg-transparent dark:bg-transparent kpi-card-content">
         <!-- Top section with icon on left, title on right -->
         <div class="flex items-center justify-between mb-2 bg-transparent dark:bg-transparent">
           <div *ngIf="icon" class="rounded-md bg-blue-50 dark:bg-primary-900/40 p-2 flex items-center justify-center">
@@ -106,4 +113,5 @@ export class KpiCardComponent {
   @Input() icon = '';
   @Input() change?: number; // Percentage change (up or down)
   @Input() subtitle = '';
+  @Input() loading = false;
 } 

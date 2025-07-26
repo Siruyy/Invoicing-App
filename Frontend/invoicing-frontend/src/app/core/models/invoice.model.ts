@@ -33,8 +33,7 @@ export interface Invoice {
   taxRate?: number;
   taxAmount?: number;
   discount?: number;
-  totalAmount?: number; // Match the backend field name 
-  total?: number;       // Keep for backward compatibility
+  totalAmount?: number;
   notes?: string;
   terms?: string;
   createdAt?: Date;

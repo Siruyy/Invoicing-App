@@ -10,5 +10,9 @@ namespace InvoicingApp.Application.Interfaces
         Task<int> CreateClientAsync(CreateClientDto clientDto);
         Task UpdateClientAsync(UpdateClientDto clientDto);
         Task DeleteClientAsync(int id);
+        
+        // CSV Import/Export methods
+        Task<byte[]> ExportClientsToCsvAsync(IEnumerable<int> clientIds);
+        Task<int> ImportClientsFromCsvAsync(Stream csvStream);
     }
 } 

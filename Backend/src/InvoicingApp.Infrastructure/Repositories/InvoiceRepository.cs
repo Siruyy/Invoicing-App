@@ -98,5 +98,25 @@ namespace InvoicingApp.Infrastructure.Repositories
             var items = await _context.InvoiceItems.Where(i => i.InvoiceId == invoiceId).ToListAsync();
             _context.InvoiceItems.RemoveRange(items);
         }
+        
+        public async Task<Invoice?> GetByIdWithItemsAndClientAsync(int id)
+        {
+            return await _context.Invoices
+                .Include(i => i.Client)
+                .Include(i => i.Items)
+                .FirstOrDefaultAsync(i => i.Id == id);
+        }
+        
+        public async Task<int> AddInvoiceAsync(Invoice invoice)
+        {
+            await _context.Invoices.AddAsync(invoice);
+            await _context.SaveChangesAsync();
+            return invoice.Id;
+        }
+        
+        public async Task AddItemAsync(InvoiceItem item)
+        {
+            await _context.InvoiceItems.AddAsync(item);
+        }
     }
 } 

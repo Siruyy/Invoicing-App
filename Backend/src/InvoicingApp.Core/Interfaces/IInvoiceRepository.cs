@@ -12,5 +12,8 @@ namespace InvoicingApp.Core.Interfaces
         Task<string> GenerateInvoiceNumberAsync();
         Task RemoveInvoiceItemsAsync(int invoiceId);
         Task<IEnumerable<Invoice>> GetAllInvoicesWithClientsAsync();
+        Task<Invoice?> GetByIdWithItemsAndClientAsync(int id);
+        Task<int> AddInvoiceAsync(Invoice invoice);
+        Task AddItemAsync(InvoiceItem item);
     }
 } 

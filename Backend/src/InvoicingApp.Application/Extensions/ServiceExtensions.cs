@@ -11,7 +11,8 @@ namespace InvoicingApp.Application.Extensions
             services.AddScoped<IClientService, ClientService>();
             services.AddScoped<IInvoiceService, InvoiceService>();
             services.AddScoped<IDashboardService, DashboardService>();
-            services.AddScoped<IPdfService, PdfService>();
+            services.AddScoped<IPdfService, QuestPdfService>();
+            services.AddScoped<IAiDataFetchService, AiDataFetchService>();
 
             return services;
         }

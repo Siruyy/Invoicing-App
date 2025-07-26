@@ -129,7 +129,6 @@ export class InvoiceDetailComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('Error loading invoice', err);
         this.error = 'Unable to load invoice. Please try again later.';
         this.loading = false;
       }
@@ -139,7 +138,7 @@ export class InvoiceDetailComponent implements OnInit {
   markAsPaid(): void {
     if (!this.invoice?.id) return;
     
-    this.invoiceService.markAsPaid(this.invoice.id).subscribe({
+    this.invoiceService.updateInvoiceStatus(this.invoice.id, InvoiceStatus.PAID).subscribe({
       next: (updatedInvoice) => {
         this.invoice = updatedInvoice;
         this.messageService.add({
@@ -149,7 +148,6 @@ export class InvoiceDetailComponent implements OnInit {
         });
       },
       error: (err) => {
-        console.error('Error marking invoice as paid', err);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -174,7 +172,6 @@ export class InvoiceDetailComponent implements OnInit {
         });
       },
       error: (err) => {
-        console.error('Error sending invoice', err);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -205,7 +202,6 @@ export class InvoiceDetailComponent implements OnInit {
         setTimeout(() => this.router.navigate(['/invoices']), 1000);
       },
       error: (err) => {
-        console.error('Error deleting invoice', err);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -230,7 +226,6 @@ export class InvoiceDetailComponent implements OnInit {
         window.URL.revokeObjectURL(url);
       },
       error: (err) => {
-        console.error('Error generating PDF', err);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',

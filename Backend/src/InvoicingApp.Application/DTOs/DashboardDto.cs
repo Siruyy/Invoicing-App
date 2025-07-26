@@ -8,6 +8,12 @@ namespace InvoicingApp.Application.DTOs
         public int UnpaidInvoicesCount { get; set; }
         public int OverdueInvoicesCount { get; set; }
         public int ClientsCount { get; set; }
+        // Trend metrics (percentage change compared to previous period)
+        public decimal RevenueChange { get; set; }
+        public decimal OverdueAmountChange { get; set; }
+        public decimal InvoicesCreatedChange { get; set; }
+        public decimal AverageValueChange { get; set; }
+        public decimal AverageInvoiceValue { get; set; }
         public List<MonthlyRevenueDto> MonthlyRevenue { get; set; } = new List<MonthlyRevenueDto>();
         public List<StatusBreakdownDto> StatusBreakdown { get; set; } = new List<StatusBreakdownDto>();
     }

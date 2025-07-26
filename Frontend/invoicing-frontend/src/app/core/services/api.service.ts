@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -18,10 +18,38 @@ export class ApiService {
   }
   
   getBlob(path: string, params: HttpParams = new HttpParams()): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}${path}`, { 
+    const url = `${this.apiUrl}${path}`;
+    
+    // Set up request options with responseType: 'blob'
+    const options = { 
       params, 
-      responseType: 'blob' 
-    }).pipe(catchError(this.handleError));
+      responseType: 'blob' as 'blob',  // Type assertion needed for correct typing
+      observe: 'body' as 'body'        // Explicitly observe the response body only
+    };
+    
+    // Make the request
+    return this.http.get(url, options).pipe(
+      catchError(error => {
+        return throwError(() => new Error('Failed to download file. Please try again.'));
+      })
+    );
+  }
+  
+  // Helper method to read a blob as JSON (for error handling)
+  private readBlobAsJson(blob: Blob): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const jsonData = JSON.parse(reader.result as string);
+          resolve(jsonData);
+        } catch (e) {
+          reject(new Error('Invalid JSON in response'));
+        }
+      };
+      reader.onerror = () => reject(new Error('Failed to read response'));
+      reader.readAsText(blob);
+    });
   }
 
   post<T>(path: string, body: any = {}): Observable<T> {
@@ -45,9 +73,6 @@ export class ApiService {
   }
 
   private handleError(error: any) {
-    // Log detailed error information to console for debugging
-    console.error('API error', error);
-    
     // Extract validation errors if available
     const validationErrors = error.error?.errors ? Object.values(error.error.errors).flat() : [];
     const errorMessage = validationErrors.length > 0 

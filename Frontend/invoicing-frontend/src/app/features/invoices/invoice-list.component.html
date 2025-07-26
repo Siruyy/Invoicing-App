@@ -1,15 +1,47 @@
+<p-toast></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
 <app-card class="strong-shadow" [noPadding]="false">
   <div class="list-wrapper">
     <div class="header-row">
-      <h1 class="title">Invoices</h1>
-      <button pButton type="button" label="Create Invoice" routerLink="/invoices/new" class="green-btn"></button>
+      <h1 style="font-size: 1.5rem; font-weight: 600; color: var(--text-color);">Invoices</h1>
+      <div class="button-group">
+        <button pButton type="button" label="Export All Invoices" style="background-color: #4285f4; color: white;" class="p-button p-2 px-3" (click)="exportInvoices()"></button>
+        <button pButton type="button" label="Import Invoice" style="background-color: #ff7043; color: white;" class="p-button ml-2 p-2 px-3" (click)="openImportDialog()"></button>
+        <button pButton type="button" label="Add Invoice" routerLink="/invoices/new" class="p-button p-button-success ml-2 p-2 px-3" style="color: white;"></button>
+      </div>
     </div>
 
     <!-- Filter bar -->
-    <div class="filter-bar">
+    <div class="filter-bar p-3">
       <div class="filter-field">
         <label>Status</label>
-        <p-dropdown [options]="statusOptions" [(ngModel)]="statusFilter" placeholder="Any" (onChange)="onStatusChange()"></p-dropdown>
+        <p-dropdown 
+          [options]="statusOptions" 
+          [(ngModel)]="statusFilter" 
+          placeholder="Select Status" 
+          (onChange)="onStatusChange()"
+          [showClear]="true"
+          styleClass="status-dropdown"
+          optionLabel="label"
+          [optionValue]="'value'">
+          <ng-template pTemplate="selectedItem" let-option>
+            <div *ngIf="option?.value; else allStatuses" class="status-item">
+              <p-tag [value]="option.label" [severity]="getStatusSeverity(option.value)"></p-tag>
+            </div>
+            <ng-template #allStatuses>
+              <div>All Statuses</div>
+            </ng-template>
+          </ng-template>
+          <ng-template pTemplate="item" let-option>
+            <div *ngIf="option.value; else allOption" class="status-item">
+              <p-tag [value]="option.label" [severity]="getStatusSeverity(option.value)"></p-tag>
+            </div>
+            <ng-template #allOption>
+              <div>All Statuses</div>
+            </ng-template>
+          </ng-template>
+        </p-dropdown>
       </div>
       <div class="filter-field narrow">
         <label>Start date</label>
@@ -48,17 +80,27 @@
           <th pSortableColumn="dueDate">Due Date<p-sortIcon field="dueDate"></p-sortIcon></th>
           <th>Status</th>
           <th pSortableColumn="total" class="text-right">Amount<p-sortIcon field="total"></p-sortIcon></th>
+          <th>Actions</th>
         </tr>
       </ng-template>
 
       <ng-template pTemplate="body" let-row>
-        <tr (click)="goTo(row)" class="invoice-row cursor-pointer">
+        <tr class="invoice-row">
           <td>{{ row.invoiceNumber }}</td>
           <td>{{ row.client | safeClient }}</td>
           <td>{{ row.issueDate | date:'MMM d, y' }}</td>
           <td>{{ row.dueDate | date:'MMM d, y' }}</td>
           <td><p-tag [value]="row.status" [severity]="getStatusSeverity(row.status)"></p-tag></td>
           <td class="text-right">{{ row.totalAmount | currency }}</td>
+          <td class="actions-column">
+            <button pButton icon="pi pi-eye" class="p-button-text p-button-sm view-icon mr-2" 
+              (click)="viewInvoice(row)" pTooltip="View"></button>
+            <button pButton icon="pi pi-pencil" class="p-button-text p-button-sm edit-icon mr-2" 
+              (click)="editInvoice(row)" pTooltip="Edit"></button>
+            <button pButton icon="pi pi-trash" class="p-button-text p-button-sm delete-icon" 
+              (click)="confirmDelete(row, $event)" [disabled]="!canDeleteInvoice(row.status)" 
+              pTooltip="Delete" [tooltipDisabled]="canDeleteInvoice(row.status)"></button>
+          </td>
         </tr>
       </ng-template>
 
@@ -69,4 +111,48 @@
       </ng-template>
     </p-table>
   </div>
-</app-card> 
+</app-card>
+
+<!-- Import Dialog -->
+<p-dialog 
+  header="Import Invoices" 
+  [(visible)]="showImportDialog" 
+  [style]="{width: '450px'}" 
+  [modal]="true"
+  [draggable]="false" 
+  [resizable]="false">
+  
+  <div class="import-dialog-content">
+    <p>Upload a CSV file with invoice data. The file should have the following format:</p>
+    <div class="csv-format-info">
+      <p><strong># INVOICES</strong> section:</p>
+      <p><code>InvoiceNumber,ClientId,ClientName,IssueDate,DueDate,Subtotal,TaxRate,TaxAmount,TotalAmount,Notes,Status,Currency,ExchangeRate,PaidAt</code></p>
+      
+      <p><strong># INVOICE ITEMS</strong> section:</p>
+      <p><code>InvoiceNumber,Description,Quantity,UnitPrice,TotalPrice</code></p>
+      
+      <p class="mt-2"><em>Note: The exported CSV file already contains both sections in the correct format.</em></p>
+    </div>
+    
+    <p-fileUpload 
+      #fileUpload 
+      mode="basic" 
+      chooseLabel="Choose CSV file" 
+      [auto]="false"
+      accept=".csv" 
+      [maxFileSize]="1000000" 
+      (onSelect)="onFileSelected($event)"
+      [showUploadButton]="false" 
+      [showCancelButton]="false">
+    </p-fileUpload>
+    
+    <div *ngIf="uploadedFile" class="mt-2">
+      <p>Selected file: {{uploadedFile.name}}</p>
+    </div>
+  </div>
+  
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancel" icon="pi pi-times" (click)="closeImportDialog()" class="p-button-text"></button>
+    <button pButton label="Import" icon="pi pi-upload" (click)="importInvoices()" [disabled]="!uploadedFile || importInProgress" class="p-button-primary"></button>
+  </ng-template>
+</p-dialog>

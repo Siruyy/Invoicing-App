@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { Client } from '../models/client.model';
 import { HttpParams } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -49,6 +50,41 @@ export class ClientService {
 
   deleteClient(id: number): Observable<void> {
     return this.api.delete<void>(`/clients/${id}`);
+  }
+  
+  /**
+   * Import clients from CSV file
+   * @param file The CSV file to import
+   * @returns Observable with import result
+   */
+  importClientsFromCsv(file: File): Observable<{ imported: number }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return this.api.post<{ imported: number }>('/clients/import', formData);
+  }
+  
+  /**
+   * Export clients to CSV
+   * @param ids Array of client IDs to export (empty for all clients)
+   * @returns Observable with CSV blob
+   */
+  exportClientsToCsv(ids: number[] = []): Observable<Blob> {
+    console.log('Starting client export process');
+    let params = new HttpParams();
+    
+    if (ids.length > 0) {
+      params = params.set('ids', ids.join(','));
+    }
+    
+    console.log('Making export request to API');
+    // Use our ApiService's getBlob method
+    return this.api.getBlob('/clients/export', params).pipe(
+      catchError(error => {
+        console.error('CSV export error:', error);
+        return throwError(() => new Error('Failed to export clients. Please check the console for details.'));
+      })
+    );
   }
 
   /**

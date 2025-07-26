@@ -1,7 +1,10 @@
 using InvoicingApp.Application.Extensions;
 using InvoicingApp.Infrastructure.Data;
 using InvoicingApp.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,27 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Register application services
 builder.Services.AddApplicationServices();
+
+// Configure JWT Authentication
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Secret"] ?? "YOUR_SUPER_SECRET_KEY_WITH_AT_LEAST_32_CHARACTERS")),
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "InvoicingApp",
+        ValidAudience = builder.Configuration["JwtSettings:Audience"] ?? "InvoicingAppClient",
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 // Add controllers
 builder.Services.AddControllers();
@@ -77,6 +101,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
