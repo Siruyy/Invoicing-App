@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { Invoice, InvoiceStatus } from '../models/invoice.model';
@@ -40,8 +40,6 @@ export class InvoiceService {
     
     return this.api.get<any>('/invoices', params).pipe(
       map(response => {
-        console.log('API response:', response);
-        
         // Handle different response formats: array or object with items property
         let items = [];
         let total = 0;
@@ -55,10 +53,8 @@ export class InvoiceService {
           items = response.items;
           total = response.total || items.length;
         } else if (!response) {
-          console.error('Empty response from API');
           return { items: [], total: 0 };
         } else {
-          console.error('Invalid response format:', response);
           return { items: [], total: 0 };
         }
         
@@ -78,12 +74,8 @@ export class InvoiceService {
           // Debug client data
           if (typeof processedItem.client === 'undefined' || processedItem.client === null) {
             if (processedItem.clientId) {
-              console.log(`Invoice ${processedItem.invoiceNumber} has clientId ${processedItem.clientId} but no client object`);
-            } else {
-              console.warn(`Invoice ${processedItem.invoiceNumber} has no client data`);
+              // Client ID exists but no client object
             }
-          } else if (typeof processedItem.client === 'object') {
-            console.log(`Invoice ${processedItem.invoiceNumber} has client object with name: ${processedItem.client.name || 'MISSING NAME!'}`);
           }
           
           return processedItem;
@@ -125,13 +117,51 @@ export class InvoiceService {
     return this.api.get<any>(`/invoices/${id}`).pipe(
       map(invoice => {
         if (!invoice) {
-          console.error('Invoice not found or invalid response');
           throw new Error('Invoice not found');
         }
         return {
           ...invoice,
           status: invoice.status !== undefined ? this.mapStatusFromBackend(invoice.status) : InvoiceStatus.DRAFT
         };
+      })
+    );
+  }
+  
+  getRecentInvoices(limit: number = 5): Observable<Invoice[]> {
+    const params = new HttpParams()
+      .set('page', '1')
+      .set('limit', limit.toString())
+      .set('sortBy', 'issueDate')
+      .set('sortOrder', 'desc');
+      
+    return this.api.get<any>('/invoices', params).pipe(
+      map(response => {
+        let items: Invoice[] = [];
+        
+        if (Array.isArray(response)) {
+          items = response;
+        } else if (response && response.items) {
+          items = response.items;
+        }
+        
+        return items.map(invoice => {
+          // Add clientName property derived from the client object or fallback to 'Unknown'
+          let clientName = 'Unknown';
+          
+          if (invoice.client && typeof invoice.client !== 'number') {
+            // Use the client name as the primary identifier
+            clientName = invoice.client.name || 'Unknown';
+          }
+            
+          return {
+            ...invoice,
+            clientName: clientName,
+            status: typeof invoice.status === 'number' ? this.mapStatusFromBackend(invoice.status) : invoice.status || InvoiceStatus.DRAFT
+          };
+        });
+      }),
+      catchError(error => {
+        return of([]);
       })
     );
   }
@@ -143,11 +173,9 @@ export class InvoiceService {
       status: this.mapStatusToBackend(invoice.status || InvoiceStatus.DRAFT)
     };
     
-    console.log('Sending create payload:', mappedInvoice); // Debug log
     return this.api.post<any>('/invoices', mappedInvoice).pipe(
       map(response => {
         if (!response) {
-          console.warn('Empty response from createInvoice');
           // Return a default structure with the invoice data
           return {
             ...invoice,
@@ -169,7 +197,6 @@ export class InvoiceService {
       status: this.mapStatusToBackend(invoice.status || InvoiceStatus.DRAFT)
     };
     
-    console.log('Sending update payload:', mappedInvoice); // Debug log
     return this.api.put<any>(`/invoices/${id}`, mappedInvoice).pipe(
       map(response => {
         // The update endpoint returns 204 No Content
@@ -180,7 +207,6 @@ export class InvoiceService {
         };
       }),
       catchError(error => {
-        console.error('Error updating invoice:', error);
         // Return the original invoice anyway to prevent UI errors
         return of({
           ...invoice,
@@ -211,17 +237,6 @@ export class InvoiceService {
     );
   }
   
-  markAsPaid(id: number): Observable<Invoice> {
-    return this.api.patch<any>(`/invoices/${id}/mark-as-paid`, {}).pipe(
-      map(response => {
-        return {
-          ...response,
-          status: this.mapStatusFromBackend(response.status)
-        };
-      })
-    );
-  }
-  
   generateInvoicePdf(id: number): Observable<Blob> {
     return this.api.get<Blob>(`/invoices/${id}/pdf`);
   }
@@ -232,26 +247,6 @@ export class InvoiceService {
       .pipe(
         map(response => response.invoiceNumber)
       );
-    
-    // Fallback if API is not available yet
-    // return of(`INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`);
-  }
-
-  saveDraft(invoice: Invoice): Observable<Invoice> {
-    // Map the status to numeric value for the backend
-    const mappedInvoice = {
-      ...invoice,
-      status: this.mapStatusToBackend(invoice.status)
-    };
-    
-    return this.api.post<any>('/invoices/drafts', mappedInvoice).pipe(
-      map(response => {
-        return {
-          ...response,
-          status: this.mapStatusFromBackend(response.status)
-        };
-      })
-    );
   }
   
   sendInvoiceEmail(id: number, recipientEmail: string): Observable<void> {
@@ -261,5 +256,33 @@ export class InvoiceService {
   
   downloadInvoicePdf(id: number): Observable<Blob> {
     return this.api.getBlob(`/invoices/${id}/pdf`);
+  }
+  
+  /**
+   * Import invoices from CSV file
+   * @param file The CSV file to import
+   * @returns Observable with import result
+   */
+  importInvoicesFromCsv(file: File): Observable<{ imported: number }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return this.api.post<{ imported: number }>('/invoices/import', formData);
+  }
+  
+  /**
+   * Export invoices to CSV
+   * @param ids Array of invoice IDs to export (empty for all invoices)
+   * @returns Observable with CSV blob
+   */
+  exportInvoicesToCsv(ids: number[] = []): Observable<Blob> {
+    let params = new HttpParams();
+    
+    if (ids.length > 0) {
+      params = params.set('ids', ids.join(','));
+    }
+    
+    // Use our getBlob method
+    return this.api.getBlob('/invoices/export', params);
   }
 } 

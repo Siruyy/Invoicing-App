@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 // PrimeNG
 import { TableModule } from 'primeng/table';
@@ -12,6 +13,12 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { CardComponent } from '../../shared/components/card/card.component';
 import { SafeClientPipe } from '../../shared/pipes/safe-client.pipe';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
+import { DialogModule } from 'primeng/dialog';
+import { FileUploadModule } from 'primeng/fileupload';
 
 import { Invoice, InvoiceStatus } from '../../core/models/invoice.model';
 import { InvoiceService } from '../../core/services/invoice.service';
@@ -32,14 +39,25 @@ import { InvoiceService } from '../../core/services/invoice.service';
     DatePipe,
     CurrencyPipe,
     CardComponent,
-    SafeClientPipe
+    SafeClientPipe,
+    ConfirmDialogModule,
+    ToastModule,
+    TooltipModule,
+    DialogModule,
+    FileUploadModule
   ],
+  providers: [ConfirmationService, MessageService],
   templateUrl: './invoice-list.component.html',
   styleUrls: ['./invoice-list.component.scss']
 })
 export class InvoiceListComponent implements OnInit {
   invoices: Invoice[] = [];
   loading = true;
+  
+  // Import/Export related properties
+  showImportDialog: boolean = false;
+  uploadedFile: File | null = null;
+  importInProgress: boolean = false;
 
   // filter state
   statusFilter: InvoiceStatus | null = null;
@@ -48,11 +66,11 @@ export class InvoiceListComponent implements OnInit {
   globalSearch = '';
 
   statusOptions = [
-    { label: 'All', value: null },
-    { label: 'Draft', value: InvoiceStatus.DRAFT },
-    { label: 'Pending', value: InvoiceStatus.PENDING },
-    { label: 'Paid', value: InvoiceStatus.PAID },
-    { label: 'Overdue', value: InvoiceStatus.OVERDUE }
+    { label: 'All Statuses', value: null },
+    { label: 'Draft', value: InvoiceStatus.DRAFT, styleClass: 'status-draft' },
+    { label: 'Pending', value: InvoiceStatus.PENDING, styleClass: 'status-pending' },
+    { label: 'Paid', value: InvoiceStatus.PAID, styleClass: 'status-paid' },
+    { label: 'Overdue', value: InvoiceStatus.OVERDUE, styleClass: 'status-overdue' }
   ];
 
   totalRecords = 0;
@@ -62,7 +80,9 @@ export class InvoiceListComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private invoiceService: InvoiceService
+    private invoiceService: InvoiceService,
+    private confirmationService: ConfirmationService,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -82,8 +102,6 @@ export class InvoiceListComponent implements OnInit {
     // Make sure first is in sync with currentPage
     this.first = (page - 1) * limit;
     
-    console.log(`Loading invoices for page ${page}, limit ${limit}, first: ${this.first}`);
-    
     this.invoiceService.getInvoices(
       page,
       limit,
@@ -98,26 +116,77 @@ export class InvoiceListComponent implements OnInit {
         this.invoices = response.items;
         this.totalRecords = response.total;
         this.loading = false;
-        
-        console.log('Loaded invoices:', this.invoices);
-        console.log('Total records:', this.totalRecords);
-        console.log('Current filters:', {
-          status: this.statusFilter,
-          startDate: this.startDateFilter,
-          endDate: this.endDateFilter,
-          search: this.globalSearch
-        });
       },
       error: (error) => {
-        console.error('Failed to load invoices:', error);
         this.loading = false;
         this.invoices = [];
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Load Failed',
+          detail: 'Failed to load invoices'
+        });
       }
     });
   }
 
-  goTo(inv: Invoice) {
-    this.router.navigate(['/invoices', inv.id, 'edit']);
+  // Removed the goTo method as we no longer want clicking the row to navigate
+
+  editInvoice(invoice: Invoice) {
+    this.router.navigate(['/invoices', invoice.id, 'edit']);
+  }
+
+  viewInvoice(invoice: Invoice) {
+    this.router.navigate(['/invoices', invoice.id, 'view']);
+  }
+
+  canDeleteInvoice(status: InvoiceStatus): boolean {
+    return status === InvoiceStatus.DRAFT || status === InvoiceStatus.PENDING;
+  }
+
+  confirmDelete(invoice: Invoice, event: Event) {
+    event.stopPropagation(); // Prevent row click event
+
+    if (!this.canDeleteInvoice(invoice.status)) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Cannot Delete',
+        detail: 'Only draft and pending invoices can be deleted'
+      });
+      return;
+    }
+
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
+      message: `Are you sure you want to delete invoice ${invoice.invoiceNumber}?`,
+      header: 'Delete Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.deleteInvoice(invoice);
+      }
+    });
+  }
+
+  deleteInvoice(invoice: Invoice) {
+    this.loading = true;
+    this.invoiceService.deleteInvoice(invoice.id!).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Invoice Deleted',
+          detail: `Invoice ${invoice.invoiceNumber} has been deleted successfully`
+        });
+        this.loadInvoices(); // Reload the list
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Delete Failed',
+          detail: 'An error occurred while deleting the invoice'
+        });
+        this.loading = false;
+      }
+    });
   }
 
   // Filter and pagination handlers
@@ -140,8 +209,6 @@ export class InvoiceListComponent implements OnInit {
   }
   
   onPageChange(event: any): void {
-    console.log('Page change event:', event);
-    
     // PrimeNG pagination sends 'first' (starting index) and 'rows' (page size)
     // Calculate the page number from the first index and rows
     const rows = event.rows !== undefined ? Number(event.rows) : 10;
@@ -160,7 +227,6 @@ export class InvoiceListComponent implements OnInit {
     this.currentPage = isNaN(page) ? 1 : page;
     this.rowsPerPage = isNaN(rows) ? 10 : rows;
     
-    console.log(`Setting page to ${this.currentPage}, rows to ${this.rowsPerPage}`);
     this.loadInvoices();
   }
 
@@ -178,5 +244,77 @@ export class InvoiceListComponent implements OnInit {
       default:
         return 'info';
     }
+  }
+  
+  // Export invoices to CSV
+  exportInvoices(): void {
+    // Show loading message
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Export',
+      detail: 'Preparing invoice export...',
+      life: 2000
+    });
+
+    // Direct approach: open the URL in a new tab/window
+    const exportUrl = `${environment.apiUrl}/invoices/export`;
+    window.open(exportUrl, '_blank');
+    
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Export started. If download doesn\'t begin automatically, check your browser settings.'
+    });
+  }
+  
+  // Import Dialog Methods
+  openImportDialog(): void {
+    this.uploadedFile = null;
+    this.showImportDialog = true;
+  }
+  
+  closeImportDialog(): void {
+    this.showImportDialog = false;
+    this.uploadedFile = null;
+  }
+  
+  onFileSelected(event: any): void {
+    if (event.files && event.files.length > 0) {
+      this.uploadedFile = event.files[0];
+    }
+  }
+  
+  importInvoices(): void {
+    if (!this.uploadedFile) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please select a CSV file to import'
+      });
+      return;
+    }
+    
+    this.importInProgress = true;
+    
+    this.invoiceService.importInvoicesFromCsv(this.uploadedFile).subscribe({
+      next: (result) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: `Successfully imported ${result.imported} invoices`
+        });
+        this.closeImportDialog();
+        this.loadInvoices(); // Reload the invoice list
+        this.importInProgress = false;
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.error?.message || 'Failed to import invoices'
+        });
+        this.importInProgress = false;
+      }
+    });
   }
 } 
